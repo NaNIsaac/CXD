@@ -1,0 +1,31 @@
+[project]
+name = "cxd"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Isaac", email = "isaacyong@naver.com" }
+]
+requires-python = ">=3.13"
+dependencies = [
+    "ipykernel>=7.2.0",
+    "matplotlib>=3.10.8",
+    "numpy>=2.4.4",
+    "pandas>=3.0.2",
+    "pytest>=9.0.3",
+    "pyvista[colormaps]>=0.47.3",
+    "roi-rectangle>=1.0.0",
+    "scipy>=1.17.1",
+    "tifffile>=2026.4.11",
+]
+
+[build-system]
+requires = ["uv_build>=0.9.17,<0.10.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0.3",
+    "pyvista[jupyter]>=0.47.3",
+    "ruff>=0.15.10",
+]
