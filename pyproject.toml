@@ -15,6 +15,7 @@ dependencies = [
     "pytest>=9.0.3",
     "pyvista[colormaps]>=0.47.3",
     "roi-rectangle>=1.0.0",
+    "scikit-learn>=1.8.0",
     "scipy>=1.17.1",
     "tifffile>=2026.4.11",
 ]
