@@ -16,7 +16,7 @@ def compute_normalized_xcorr(A1: np.ndarray, A2: np.ndarray) -> float:
     F1: np.ndarray = fftn(A1)
     F2: np.ndarray = fftn(A2)
     xcorr: np.ndarray = np.real(ifftn(F1 * np.conj(F2)))
-    
+
     # 정렬이 최적화된 위치에서의 최대 상관계수 추출 및 정규화 [-1, 1]
     max_corr: float = np.max(xcorr) / (norm1 * norm2)
     return max_corr
