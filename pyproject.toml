@@ -1,11 +1,9 @@
 [project]
 name = "cxd"
 version = "0.1.0"
-description = "Add your description here"
+description = "Analysis code for coherent X-ray diffraction (CXD) data: SPEC parsing, Timepix frame loading, q-space regridding and 3D visualization"
 readme = "README.md"
-authors = [
-    { name = "Isaac", email = "isaacyong@naver.com" }
-]
+authors = [{ name = "Isaac Yong", email = "isaacyong@naver.com" }]
 requires-python = ">=3.13"
 dependencies = [
     "ipykernel>=7.2.0",
@@ -19,6 +17,10 @@ dependencies = [
     "scipy>=1.17.1",
     "tifffile>=2026.4.11",
 ]
+
+[project.urls]
+Homepage = "https://github.com/NaNIsaac/CXD"
+Repository = "https://github.com/NaNIsaac/CXD"
 
 [build-system]
 requires = ["uv_build>=0.9.17,<0.10.0"]
