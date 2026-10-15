@@ -52,3 +52,11 @@ The scripts in `scripts/` and `src/cxd/gam_del.py` use hardcoded data paths in `
 ```
 uv run pytest
 ```
+
+## Citation
+
+See [CITATION.cff](CITATION.cff).
+
+## License
+
+MIT, see [LICENSE](LICENSE).
