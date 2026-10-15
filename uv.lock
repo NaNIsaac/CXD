@@ -478,6 +478,7 @@ dependencies = [
     { name = "scikit-learn" },
     { name = "scipy" },
     { name = "trame" },
+    { name = "vtk" },
 ]
 
 [package.metadata]
@@ -490,6 +491,7 @@ requires-dist = [
     { name = "scikit-learn", specifier = ">=1.8.0" },
     { name = "scipy", specifier = ">=1.17.1" },
     { name = "trame", specifier = ">=3.12.0" },
+    { name = "vtk", specifier = ">=9.6.0" },
 ]
 
 [[package]]

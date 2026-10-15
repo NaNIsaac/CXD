@@ -1,3 +1,4 @@
+from PIL.ImageShow import show
 from pathlib import Path
 
 import matplotlib.pyplot as plt
@@ -5,8 +6,10 @@ import numpy as np
 from scipy.ndimage import gaussian_filter, map_coordinates
 
 from cxd_map.io_util import load_roi_mat
-from cxd_map.mapping import extract_peak_from_2d_map, map2spherical, unit2spherical
+from cxd_map.mapping import extract_peak_from_2d_map, map2spherical, shear_correction
 from cxd_map.statistics import center_of_mass
+from cxd_map.visualize import vtk_visualize_cxd
+
 
 def get_thick_line_profile(
     imgs: np.ndarray,
@@ -142,7 +145,7 @@ def plot_paired_lines_subplots(combined_results):
     plt.show()
 
 
-def plot_origin_style(combined_results) -> plt.Figure:
+def plot_origin_style(combined_results, show=True) -> plt.Figure:
     num_axes = len(combined_results)
     fig, axes = plt.subplots(num_axes, 1, figsize=(8, 4 * num_axes), sharex=True)
     
@@ -173,7 +176,8 @@ def plot_origin_style(combined_results) -> plt.Figure:
     axes[-1].set_xlabel("Distance from CoM (pixels)", fontweight='bold')
     
     plt.tight_layout()
-    plt.show()
+    if show:
+        plt.show()
 
     return fig
 
@@ -181,6 +185,17 @@ def main():
     data_dir: Path = Path(r"D:\05_Resources\Data\9C_260324\onsite\ROI")
     save_dir: Path = Path(r"D:\05_Resources\Data\9C_260324\analysis")
     run_ns: list[int]   = [255]
+
+    params = {
+        "wavelength": 12.398 / 5.55 * 1e-10,      # hc/energy(keV) (m)
+        "delta_theta": np.radians(0.8 / 120), # Δθ 
+        "D": 0.511, # D 
+        "gamma": np.radians(0),  # γ 
+        "delta": np.radians(69),  # δ 
+        "pixel_size": 5.5e-5           # p 
+    }
+    B_recip = shear_correction(**params)
+
     for run_n in run_ns:
         data_file: Path = data_dir / f"scan_{run_n:04d}.mat"
 
@@ -200,12 +215,21 @@ def main():
         peaks = extract_peak_from_2d_map(
             hist, u_edges, phi_edges, eps=0.2, threshold_rel=0.3
         )
+
+        q_peaks = []
+        for p_idx in peaks:
+            # q_vec = B_recip * n [cite: 133]
+            q_vec = B_recip @ p_idx 
+            q_peaks.append(q_vec / np.linalg.norm(q_vec)) # 단위 벡터화
         
+        q_peaks = np.array(q_peaks)
+
         print(f"검출된 피크 개수: {len(peaks)}")
         results = get_symmetric_profiles(imgs, com, peaks, length=50, thickness=3)
-        fig = plot_origin_style(results)
+        fig = plot_origin_style(results, show=False)
 
         fig.savefig(save_dir / f"plot_{run_n:04d}.png", dpi=300, bbox_inches='tight')
+        vtk_visualize_cxd(imgs, com, results, peaks, B_recip, save_path=save_dir / f"vtk_{run_n:04d}.png", show=False)
 
 if __name__ == "__main__":
     main()

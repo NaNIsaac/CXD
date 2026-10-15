@@ -1,6 +1,43 @@
 import numpy as np
 from sklearn.cluster import DBSCAN
 
+def rotation_matrix(angle, axis):
+    # Rodrigues' rotation formula implementation
+    # cite: 274
+    c, s = np.cos(angle), np.sin(angle)
+    ux, uy, uz = axis
+    return np.array([
+        [c+ux**2*(1-c), ux*uy*(1-c)-uz*s, ux*uz*(1-c)+uy*s],
+        [uy*ux*(1-c)+uz*s, c+uy**2*(1-c), uy*uz*(1-c)-ux*s],
+        [uz*ux*(1-c)-uy*s, uz*uy*(1-c)+ux*s, c+uz**2*(1-c)]
+    ])
+
+def shear_correction(wavelength: float, delta_theta: float, D: float, gamma: float, delta: float, pixel_size: float) -> np.ndarray:
+    s1, s2, s3 = np.eye(3)
+
+    # Detector rotation matrix [cite: 291]
+    # Note: Negative gamma due to clockwise rotation at 34-ID-C [cite: 299]
+    R_delta = rotation_matrix(delta, s2)
+    R_gamma = rotation_matrix(gamma, -s1)
+    B_det = R_delta @ R_gamma 
+
+    # Extract ki, kj directions from B_det columns [cite: 300, 302]
+    ki_hat = B_det[:, 0]
+    kj_hat = B_det[:, 1]
+
+    # q_i and q_j magnitude [cite: 243, 320, 321]
+    pref = pixel_size / (wavelength * D)
+    qi = pref * ki_hat
+    qj = pref * kj_hat
+
+    # Compute q_k from rocking step [cite: 314, 325]
+    q0 = (1/wavelength) * (B_det @ s3 - s3) # [cite: 310]
+    dq0 = (rotation_matrix(delta_theta, s2) @ q0) - q0
+    qk = -dq0 # [cite: 318]
+
+    B_recip = np.stack([qi, qj, qk], axis=1)
+
+    return B_recip
 
 def map2solid_angle(imgs: np.ndarray, com: np.ndarray, bins: int = 100):
     """
