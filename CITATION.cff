@@ -10,7 +10,6 @@ authors:
 license: MIT
 repository-code: "https://github.com/NaNIsaac/CXD"
 abstract: "Analysis code for coherent X-ray diffraction (CXD) data: SPEC file parsing, Timepix TIFF frame loading, rocking-curve to q-space regridding, and 3D q-space visualization."
-license: MIT
 keywords:
   - "coherent X-ray diffraction"
   - "SPEC"
