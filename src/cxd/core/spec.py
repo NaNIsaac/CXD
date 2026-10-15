@@ -91,10 +91,14 @@ class SpecScan:
 
     @property
     def beam_center(self) -> dict[str, float]:
+        """Center pixel of the first detector ROI; {0, 0} when the scan has no ROI."""
+        if not self.rois:
+            return {"x": 0, "y": 0}
         roi = self.rois[0]
-        bc_x = roi["min_x"] + roi["min_x"] // 2
-        bc_y = roi["min_y"] + roi["min_y"] // 2
-        return {"x": bc_x, "y": bc_y}
+        return {
+            "x": roi["min_x"] + roi["size_x"] // 2,
+            "y": roi["min_y"] + roi["size_y"] // 2,
+        }
 
 
 class Spec:
@@ -207,6 +211,4 @@ if __name__ == '__main__':
 
     spec = Spec(file, lazy=True).read()
     scan = spec.get_scan(2483)
-    roi = scan.rois[0]
-    bc_x = roi["min_x"] + roi["min_x"] // 2
-    bc_y = roi["min_y"] + roi["min_y"] // 2
+    print(scan.beam_center)

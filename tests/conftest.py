@@ -18,7 +18,7 @@ SPEC_FIXTURE = """\
 #P1 0.4 0.5
 #UXML <ad_detector><sample_detector_distance>123.45</sample_detector_distance></ad_detector>
 #UXML <ad_center><beam_center_x>512</beam_center_x><beam_center_y>256</beam_center_y></ad_center>
-#UXML <ad_regions_of_interest><roi><name>roi1</name><x>10</x></roi><roi><name>roi2</name><x>20</x></roi></ad_regions_of_interest>
+#UXML <ad_regions_of_interest><roi><name>roi1</name><x>10</x><min_x>500</min_x><size_x>24</size_x><min_y>250</min_y><size_y>12</size_y></roi><roi><name>roi2</name><x>20</x></roi></ad_regions_of_interest>
 #N 3
 #L col_a col_b col_c
 0.0 1.0 2.0
