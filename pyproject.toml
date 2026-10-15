@@ -1,7 +1,7 @@
 [project]
 name = "cxd_map"
 version = "0.1.0"
-description = "Add your description here"
+description = "BCDI peak analysis: streak and facet directions from a 3D diffraction pattern"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
