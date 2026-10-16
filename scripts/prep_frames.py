@@ -1,18 +1,22 @@
+import argparse
 from pathlib import Path
 
 import numpy as np
+from qorageom.io import load_tif_stack
 
-from cxd.core.io_util import load_raw_tifs
 
-def merge_raw_tif_to_npy(tif_dir: Path | str, save_fie: Path | str) -> None:
-    tif_dir = Path(tif_dir)
-    frames: np.ndarray = load_raw_tifs(sorted(tif_dir.glob("*.tif")))
+def merge_raw_tif_to_npy(tif_dir: Path | str, save_file: Path | str) -> None:
+    frames: np.ndarray = load_tif_stack(sorted(Path(tif_dir).glob("*.tif")))
+    np.save(save_file, frames)
 
-    np.save(save_fie,frames)
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description="Merge one scan's TIFF frames into a single .npy (frame, y, x).")
+    parser.add_argument("tif_dir", type=Path, help="folder with the scan's *.tif frames, e.g. data/S3358")
+    parser.add_argument("save_file", type=Path, help="output .npy, e.g. analysis/merged/scan_3358.npy")
+    args = parser.parse_args()
+    merge_raw_tif_to_npy(args.tif_dir, args.save_file)
 
 
 if __name__ == "__main__":
-    num: int = 3358
-    tif_dir: Path = Path(rf"D:\05_Resources\Data\9C_260324\data\S{num:04d}")
-    save_file: Path = Path(r"D:\05_Resources\Data\9C_260324\analysis\merged") / f"scan_{num:04d}.npy"
-    merge_raw_tif_to_npy(tif_dir, save_file)
+    main()

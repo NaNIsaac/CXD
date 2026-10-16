@@ -1,5 +1,5 @@
 import numpy as np
-from .constants import hc
+from qorageom import wavelength
 
 
 def correct_rocking(
@@ -22,7 +22,7 @@ def correct_rocking(
         raise ValueError(f"Frames must be a 3D array. Got shape {frames.shape}.")
     
     num_omega, ny, nx = frames.shape
-    wavelen: float = hc / beam_energy
+    wavelen: float = wavelength(beam_energy)
     k0: float = 2 * np.pi / wavelen
     
     if num_omega != len(thetas):
