@@ -1,3 +1,4 @@
+import argparse
 from pathlib import Path
 import numpy as np
 import pandas as pd
@@ -35,9 +36,11 @@ def load_run_data(sp: Spec, run_ns: list[int]) -> pd.DataFrame:
 # [Main 실행부]
 # ==========================================
 def main():
-    # --- [Configuration] ---
-    spec_file = Path(r"C:\Workspace\05_Resources\Data\260324")
-    run_ns = [3884, 3893, 3913, 3929, 3941, 3953, 3971, 3989, 4007, 4025, 4043, 4079]
+    parser = argparse.ArgumentParser(description="Measured gamma/delta of runs against the theoretical arc of one 2theta.")
+    parser.add_argument("spec_file", type=Path)
+    parser.add_argument("runs", type=int, nargs="+", help="run numbers, plotted in the given order")
+    args = parser.parse_args()
+    spec_file, run_ns = args.spec_file, args.runs
     
     # --- 1. SPEC 데이터 로드 ---
     sp = Spec(spec_file)

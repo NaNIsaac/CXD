@@ -1,27 +1,15 @@
+import argparse
 from pathlib import Path
 
-import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from roi_rectangle import RoiRectangle
 
 from cxd.core.constants import TIMEPIX_PIXEL_SIZE
-from cxd.core.spec import Spec
+from cxd.core.spec import Spec, get_positions
 from cxd.core.statistics import get_com
 from scripts.prep_frames import merge_raw_tif_to_npy
 
-
-def get_positions(run_ns: list[int], spec_file: Path) -> pd.DataFrame:
-    data = []
-    with Spec(spec_file) as sp:
-        for run_n in run_ns:
-            scan = sp.get_scan(run_n)
-            row = {"run_n": run_n, **scan.motors}
-            row['sdd'] = scan.sdd
-            row['bc'] = scan.beam_center
-            data.append(row)
-    df: pd.DataFrame = pd.DataFrame(data).set_index('run_n')
-    return df
 
 def get_tth_of_peak(frame, rect: RoiRectangle, delta, gamma, sdd, bc_y, bc_x) -> float:
     roi_frame = rect.slice(frame)
@@ -66,10 +54,13 @@ def plot_curve(names, xs, ys):
     ax.legend(frameon=True, fontsize=12)
 
 def main():
-    spec_file: Path = Path(r"D:\05_Resources\Data\9C_260324\260324")
-    npy_folder: Path = Path(r"D:\05_Resources\Data\9C_260324\analysis\merged")
-    data_dir: Path = Path(r"D:\05_Resources\Data\9C_260324\data")
-    run_ns: list[int] = [3105, 3089]
+    parser = argparse.ArgumentParser(description="2theta of the peak and intensity vs 2theta for each run.")
+    parser.add_argument("spec_file", type=Path)
+    parser.add_argument("data_dir", type=Path, help="raw TIFF folders S<run>/")
+    parser.add_argument("npy_folder", type=Path, help="where merged scan_<run>.npy files are written")
+    parser.add_argument("runs", type=int, nargs="+")
+    args = parser.parse_args()
+    spec_file, data_dir, npy_folder, run_ns = args.spec_file, args.data_dir, args.npy_folder, args.runs
 
     df = get_positions(run_ns, spec_file)
 
