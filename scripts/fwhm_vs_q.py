@@ -1,81 +1,69 @@
+import argparse
+from pathlib import Path
+
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from qorageom import tth_to_q, wavelength
 from scipy.optimize import curve_fit
-from spec import Spec
 
-def calculate_q_geometry(delta, gamma, energy=5550, g_off=1.4367, d_off=0.0112):
-    """
-    [Offset Applied Geometry Q Calculation]
-    - g_off: Gamma offset (1.4367)
-    - d_off: Delta offset (0.0112)
-    """
-    # 1. 파장 계산 (Angstrom)
-    wavelength = 12398.41 / energy 
-    
-    # 2. Offset 보정 및 라디안 변환
-    # 실제 물리적인 산란각은 세팅값에서 오프셋을 뺀 값입니다.
+from cxd.core.spec import Spec
+
+
+def calculate_q_geometry(delta, gamma, energy_kev, g_off=0.0, d_off=0.0):
+    """|Q| [1/Å] from detector gamma/delta [deg] minus their offsets; cos 2θ = cos γ · cos δ."""
     gam_corr = np.radians(gamma - g_off)
     del_corr = np.radians(delta - d_off)
-    
-    # 3. 합성 2-Theta 계산 (Legacy Logic)
-    # cos(2theta) = cos(gamma_corr) * cos(delta_corr)
-    cos_2th = np.cos(gam_corr) * np.cos(del_corr)
-    cos_2th = np.clip(cos_2th, -1.0, 1.0)
-    two_theta_rad = np.arccos(cos_2th)
-    
-    # 4. Q_total 계산 (4 * pi / lambda) * sin(theta)
-    q_total = (4.0 * np.pi / wavelength) * np.sin(two_theta_rad / 2.0)
-    
-    return q_total
+    two_theta = np.degrees(np.arccos(np.clip(np.cos(gam_corr) * np.cos(del_corr), -1.0, 1.0)))
+    return tth_to_q(two_theta, wavelength(energy_kev))
+
 
 def gaussian(x, a, xc, sigma, y0):
-    """Gaussian function for FWHM fitting"""
     return y0 + a * np.exp(-(x - xc)**2 / (2 * sigma**2))
+
 
 def fit_gaussian_fwhm(x, y):
     """Fits data to Gaussian and returns FWHM."""
     if len(y) < 4:
         return np.nan
-    
+
     p0 = [np.max(y)-np.min(y), x[np.argmax(y)], (np.max(x)-np.min(x))/10.0, np.min(y)]
-    
+
     popt, _ = curve_fit(gaussian, x, y, p0=p0, maxfev=2000)
     return 2.3548 * abs(popt[2])
 
 
 def main():
-    file = './250626'
-    energy_val = 5550
-    # 제공해주신 오프셋 값
-    GAMMA_OFF = 1.4367
-    DELTA_OFF = 0.0112
-    
-    data_files = ["data/data1.csv", "data/data2.csv", "data/data3.csv"]
-    labels = ["STO on SiO2 25 / Ti 25 300", "STO on Ti 500 700", "STO on SiO2 500"]
-    colors = ['black', 'red', 'blue']
-    
+    parser = argparse.ArgumentParser(description="Gaussian FWHM of rocking scans vs Q, one series per scan-list CSV.")
+    parser.add_argument("spec_file", type=Path)
+    parser.add_argument("csv_files", type=Path, nargs="+", help="headerless CSV: scan, gamma, delta, theta")
+    parser.add_argument("--labels", nargs="+", help="one legend label per CSV (default: file stem)")
+    parser.add_argument("--energy", type=float, default=5.55, help="keV")
+    parser.add_argument("--gamma-offset", type=float, default=1.4367, help="deg")
+    parser.add_argument("--delta-offset", type=float, default=0.0112, help="deg")
+    parser.add_argument("--counter", default="imroi1")
+    parser.add_argument("--save", type=Path, help="write the figure here instead of showing it")
+    args = parser.parse_args()
+    labels = args.labels or [f.stem for f in args.csv_files]
+
     plt.figure(figsize=(10, 7))
 
-    with Spec(file) as spec:
-        for csv_path, label, color in zip(data_files, labels, colors):
+    with Spec(args.spec_file) as spec:
+        for csv_path, label in zip(args.csv_files, labels, strict=True):
             csv_df = pd.read_csv(csv_path, header=None, names=["scan", "gamma", "delta", "theta"])
             group_results = []
-            
+
             for _, row in csv_df.iterrows():
-                scan = spec.get_scan(row['scan'])
-                if scan is None or not scan.data:
+                scan = spec.get_scan(int(row['scan']))
+                if not scan.data:
                     continue
 
-                # 오프셋을 적용한 Q 계산
-                q_val = calculate_q_geometry(row['delta'], row['gamma'], 
-                                             energy=energy_val, 
-                                             g_off=GAMMA_OFF, 
-                                             d_off=DELTA_OFF)
-                
+                q_val = calculate_q_geometry(row['delta'], row['gamma'], args.energy,
+                                             g_off=args.gamma_offset, d_off=args.delta_offset)
+
                 df_spec = scan.to_dataframe()
                 x_data = df_spec.iloc[:, 0].values.astype(float)
-                y_data = df_spec['imroi1'].values.astype(float)
+                y_data = df_spec[args.counter].values.astype(float)
 
                 fwhm = fit_gaussian_fwhm(x_data, y_data)
 
@@ -84,15 +72,19 @@ def main():
 
             if group_results:
                 res_df = pd.DataFrame(group_results).sort_values('q')
-                plt.scatter(res_df['q'], res_df['fwhm'], color=color, label=label, s=50, edgecolors='k')
+                plt.scatter(res_df['q'], res_df['fwhm'], label=label, s=50, edgecolors='k')
 
     plt.xlabel(r"$Q$ ($\AA^{-1}$)", fontsize=13)
     plt.ylabel(r"fwhm ($^\circ$)", fontsize=13)
-    plt.title(fr"Broadening (Offsets: $\gamma={GAMMA_OFF}^\circ, \delta={DELTA_OFF}^\circ$)", fontsize=13)
+    plt.title(fr"Broadening (Offsets: $\gamma={args.gamma_offset}^\circ, \delta={args.delta_offset}^\circ$)", fontsize=13)
     plt.grid(True, linestyle=':', alpha=0.6)
     plt.legend()
     plt.tight_layout()
-    plt.show()
+    if args.save:
+        plt.savefig(args.save, dpi=300, bbox_inches="tight")
+    else:
+        plt.show()
+
 
 if __name__ == '__main__':
     main()

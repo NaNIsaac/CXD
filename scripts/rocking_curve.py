@@ -1,63 +1,35 @@
+import argparse
 from pathlib import Path
 
 import matplotlib.pyplot as plt
-import numpy as np
-import pandas as pd
 
-from spec import Spec
+from cxd.core.spec import Spec
 
 plt.rcParams["font.weight"] = "bold"
 plt.rcParams["axes.labelweight"] = "bold"
 
 
-def load_scan_nums():
-    files: list[str] = ['data/data1.csv', 'data/data2.csv', 'data/data3.csv']
-    scan_nums: list[int] = []
-    for file in files:
-        df = pd.read_csv(file, header=None)
-        scan_nums.extend(df.iloc[:, 0].to_list())
-    return scan_nums
-
 def main() -> None:
-    file: Path = Path('data/250626')
-    print(f"Load spec file: '{file}'")
+    parser = argparse.ArgumentParser(description="Normalized rocking curves (counter vs first column) of SPEC scans, log scale.")
+    parser.add_argument("spec_file", type=Path)
+    parser.add_argument("scans", type=int, nargs="+")
+    parser.add_argument("--labels", nargs="+", help="one legend label per scan (default: scan number)")
+    parser.add_argument("--counter", default="imroi1")
+    parser.add_argument("--save", type=Path, help="write the figure here instead of showing it")
+    args = parser.parse_args()
+    labels = args.labels or [str(n) for n in args.scans]
 
-    plot_config = {
-        "scans": [1104, 879],
-        "labels": [
-            "$SrTiO_2$ annealed at 500$^\\circ$C on $Ti$ layer / $SiO_2$ substrate",
-            "$SrTiO_2$ annealed at 500$^\\circ$C on $SiO_2$ substrate",
-        ],
-        "colors": ["black", "blue"],
-        "legend_order": [1, 0]
-    }
- 
-    print(f"Scan numbers: {plot_config['scans']}")
-    scan_data: dict[int, dict] = {}
- 
-    with Spec(file) as spec:
-        for i, scan_n in enumerate(plot_config["scans"]):
-            scan = spec.get_scan(scan_n)
-            command = scan.command
-            print(f"Command: {command}")
-            df = scan.to_dataframe()
- 
-            scan_data[scan_n] = {}
-            scan_data[scan_n]["theta"] = df.iloc[:, 0].to_numpy()
-            scan_data[scan_n]["intensity"] = df["imroi1"].to_numpy()
-            scan_data[scan_n]["label"] = plot_config["labels"][i]
-            scan_data[scan_n]["color"] = plot_config["colors"][i]
-
-
+    print(f"Load spec file: '{args.spec_file}'")
     fig, ax = plt.subplots(1, 1, figsize=(8, 6))
-    for scan_n, data in scan_data.items():
-        intensity = data['intensity']
-        argmax = np.argmax(intensity)
-        centered_theta = data['theta'] # - data['theta'][argmax]
-        intensites_norm = intensity / intensity.max()
+    with Spec(args.spec_file) as spec:
+        for scan_n, label in zip(args.scans, labels, strict=True):
+            scan = spec.get_scan(scan_n)
+            print(f"Command: {scan.command}")
+            df = scan.to_dataframe()
+            theta = df.iloc[:, 0].to_numpy()
+            intensity = df[args.counter].to_numpy()
+            ax.plot(theta, intensity / intensity.max(), label=label)
 
-        ax.plot(centered_theta, intensites_norm, label=data["label"], color=data["color"])
- 
     border_width = 2.0
     for side in ['top', 'bottom', 'left', 'right']:
         ax.spines[side].set_linewidth(border_width)
@@ -73,18 +45,12 @@ def main() -> None:
         top=True,
         right=True
     )
+    ax.legend(frameon=True, fontsize=12)
 
-    handles, labels = ax.get_legend_handles_labels()
-    order = plot_config["legend_order"]
-
-    ax.legend(
-        [handles[idx] for idx in order], 
-        [labels[idx] for idx in order],
-        frameon=True,
-        fontsize=12
-    )
- 
-    plt.show()
+    if args.save:
+        fig.savefig(args.save, dpi=300, bbox_inches="tight")
+    else:
+        plt.show()
 
 
 if __name__ == '__main__':
