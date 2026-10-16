@@ -94,7 +94,7 @@ def plot_3d_pattern_with_orientations(imgs, com, orientations, scale=1.0, thresh
         direction = np.array([dx, dy, dz])
         
         # 스트릭은 보통 대칭이므로, 중심을 관통하도록 양방향으로 화살표를 그립니다.
-        color = plt.cm.get_cmap('hsv')(i / max(1, len(orientations)))[:3]
+        color = plt.get_cmap('hsv')(i / max(1, len(orientations)))[:3]
         
         # 정방향 (Forward)
         arrow_fwd = pv.Arrow(start=pv_com, direction=direction, scale=arrow_length)

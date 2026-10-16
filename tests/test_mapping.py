@@ -53,3 +53,34 @@ def test_line_profile_and_symmetric_pairing():
     assert res[0]["pair"] == (0, 1)
     assert res[0]["dot"] == -1.0
     assert len(res[0]["profile"]) == len(res[0]["dist"]) == 19
+
+
+def test_qspace_params_and_resampling():
+    from qorageom import tth_to_q, wavelength
+
+    from cxd.mapping.qspace import calculate_qspace_params, correct_to_qspace
+
+    dq_rock, dq_y, dq_x = calculate_qspace_params(5.55, 59.0, 5110, 0.055, 0.005)
+    lam = wavelength(5.55)
+    assert dq_y == dq_x
+    np.testing.assert_allclose(dq_y, 2 * np.pi / lam * 0.055 / 5110)
+    np.testing.assert_allclose(dq_rock, tth_to_q(59.0, lam) * np.radians(0.005))
+
+    imgs, dq = correct_to_qspace(np.ones((4, 6, 6)), 2.0, 1.0, 1.0)
+    assert dq == 1.0
+    assert imgs.shape == (8, 6, 6)
+
+
+def test_orientation_map_finds_in_plane_streak():
+    from cxd.mapping.qspace import extract_orientation_map, find_robust_peaks, get_radial_mask_radius
+
+    vol, _ = streak_volume([0, 0, 1])  # along x: theta = pi/2, phi = 0 and pi
+    com = np.array(center_of_mass(vol))
+    r_mask = get_radial_mask_radius(vol, com, sigma_multiplier=1.0)
+    assert 1 <= r_mask < 18
+
+    t_ax, p_ax, s_map = extract_orientation_map(vol, com, r_mask, num_theta=90, num_phi=180)
+    peaks = find_robust_peaks(s_map, t_ax, p_ax, threshold=0.5, min_dist=5)
+    top = peaks[:2]
+    assert all(abs(t - np.pi / 2) < 0.05 for t, _, _ in top)
+    assert sorted(round(abs(p), 1) for _, p, _ in top) == [0.0, 3.1]

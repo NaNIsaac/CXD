@@ -1,11 +1,12 @@
 import numpy as np
+from qorageom import tth_to_q, wavelength
 from scipy import ndimage
 
+
 def calculate_qspace_params(energy_kev, tth_deg, sdd_mm, pixel_mm, omega_step_deg):
-    # 1. 파장 및 기본 k 계산
-    wavelength = 12.3984 / energy_kev  # A
-    k_in = 2 * np.pi / wavelength      # A^-1
-    q_cen = 2 * k_in * np.sin(np.radians(tth_deg / 2)) # Bragg q
+    lam = wavelength(energy_kev)   # A
+    k_in = 2 * np.pi / lam         # A^-1
+    q_cen = tth_to_q(tth_deg, lam)  # Bragg q
 
     # 2. Detector dq (Y, X)
     dq_pixel = k_in * (pixel_mm / sdd_mm) # A^-1 / pixel
