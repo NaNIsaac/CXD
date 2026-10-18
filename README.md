@@ -4,6 +4,8 @@
 
 **Analysis code for coherent X-ray diffraction (CXD) data: SPEC file parsing, Timepix TIFF frame loading, rocking-curve to q-space regridding, and 3D q-space visualization.**
 
+In a Bragg coherent X-ray diffraction (BCDI) measurement a small crystal is rocked through a Bragg reflection while an area detector records a coherent diffraction pattern at each angle; the stack of frames samples the 3D diffraction pattern around one reciprocal-lattice point. This package is for reducing such scans recorded with SPEC and a Timepix detector: it reads the scan metadata and frames, maps detector pixels and rocking angles to q, shows the result in 3D, finds facet/streak directions, and sorts reconstructed amplitudes into true and twin-image groups.
+
 ## Install
 
 Requires [uv](https://docs.astral.sh/uv/) and Python 3.13.
@@ -53,14 +55,14 @@ uv run python -m cxd.gam_del <specfile> 3884 3893 3913
 - `src/cxd/core/spec.py` - `get_positions`; `Spec`, `SpecScan` from `qorageom.spec`
 - `src/cxd/core/transform.py` - rocking-angle correction and q-space regridding
 - `src/cxd/core/visualize.py` - PyVista 3D q-space viewer
-- `src/cxd/mapping/spherical.py` - (cos θ, φ) histogram around the CoM, DBSCAN streak directions (from cxd_map)
-- `src/cxd/mapping/profiles.py` - thick line profiles along paired opposite directions (from cxd_map)
-- `src/cxd/mapping/vtk_view.py` - VTK render of the pattern in reciprocal-space coordinates (from cxd_map)
-- `src/cxd/mapping/qspace.py` - isotropic q resampling, central-peak mask, r²-weighted θ/φ orientation map, local-max peaks (from bcdi_mapping)
-- `src/cxd/mapping/orientation_view.py` - Lambert projection and PyVista 3D view of the orientations (from bcdi_mapping)
+- `src/cxd/mapping/spherical.py` - (cos θ, φ) histogram around the CoM, DBSCAN streak directions
+- `src/cxd/mapping/profiles.py` - thick line profiles along paired opposite directions
+- `src/cxd/mapping/vtk_view.py` - VTK render of the pattern in reciprocal-space coordinates
+- `src/cxd/mapping/qspace.py` - isotropic q resampling, central-peak mask, r²-weighted θ/φ orientation map, local-max peaks
+- `src/cxd/mapping/orientation_view.py` - Lambert projection and PyVista 3D view of the orientations
 - `src/cxd/twin_finder.py` - split reconstructed amplitudes into true/twin groups (FFT cross-correlation + KMeans)
 - `src/cxd/gam_del.py` - interactive gamma/delta vs. theoretical 2theta check
-- `scripts/` - `prep_frames`, `analyze_raw`, `rocking_curve` and `fwhm_vs_q` (from spec_manager), `streak_profiles` (cxd_map), `orientation_map` (bcdi_mapping)
+- `scripts/` - `prep_frames`, `analyze_raw`, `rocking_curve`, `fwhm_vs_q`, `streak_profiles`, `orientation_map`
 
 ## Tests
 
