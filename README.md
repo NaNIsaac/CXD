@@ -1,6 +1,8 @@
 # CXD
 
-Analysis code for coherent X-ray diffraction (CXD) data: SPEC file parsing, Timepix TIFF frame loading, rocking-curve to q-space regridding, and 3D q-space visualization.
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+
+**Analysis code for coherent X-ray diffraction (CXD) data: SPEC file parsing, Timepix TIFF frame loading, rocking-curve to q-space regridding, and 3D q-space visualization.**
 
 ## Install
 
