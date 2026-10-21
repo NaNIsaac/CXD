@@ -85,6 +85,22 @@ uv run python -m scripts.fwhm_vs_q <specfile> <list1.csv> [<list2.csv> ...] --en
 uv run python -m cxd.gam_del <specfile> <run> [<run> ...]
 ```
 
+## Validation
+
+All test data is **synthetic**; no measured data ships with the repository.
+
+- `examples/synthetic_scan.py` writes a seeded rocking scan: a SPEC file, TIFF frames and a
+  `.mat` ROI. `tests/test_pipeline.py` runs it through `Spec`, `load_tif_stack`,
+  `calculate_qspace_params` and `to_qoraphase`. It checks the q steps against their closed form
+  (k·p/L on the detector, |Q|·Δω along the rocking axis) and pins the counts, peak position and
+  crop as a regression snapshot.
+- `tests/test_handoff.py` reconstructs a synthetic scan with QoraPhase after the handoff.
+- Known limits:
+  - `correct_rocking` ignores the detector angles, so the tests do not cover it
+    ([#10](https://github.com/NaNIsaac/CXD/issues/10)).
+  - No measured scan has been run through these tests yet
+    ([#1](https://github.com/NaNIsaac/CXD/issues/1)).
+
 ## Structure
 
 - `src/cxd/core/spec.py` - `get_positions`; `Spec`, `SpecScan` from `qorageom.spec`
