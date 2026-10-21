@@ -4,23 +4,22 @@ from scipy.fft import fftn, ifftn
 from sklearn.cluster import KMeans
 
 
-def compute_normalized_xcorr(A1: np.ndarray, A2: np.ndarray) -> float:
-    """FFT를 이용해 이동 불변 최대 교차 상관계수(유사도)를 계산합니다."""
-    # 정규화를 위한 분산 계산 (L2 norm)
-    norm1: np.floating[Any] = np.linalg.norm(A1)
-    norm2: np.floating[Any] = np.linalg.norm(A2)
-
+def _xcorr_peak(F1: np.ndarray, F2: np.ndarray, norm1: float, norm2: float) -> float:
+    """FFT 스펙트럼 두 개와 L2 norm으로 정규화된 최대 교차 상관계수를 계산합니다."""
     if norm1 == 0 or norm2 == 0:
         return 0.0
-
-    # FFT 기반 Cross-correlation
-    F1: np.ndarray = fftn(A1)
-    F2: np.ndarray = fftn(A2)
     xcorr: np.ndarray = np.real(ifftn(F1 * np.conj(F2)))
-
     # 정렬이 최적화된 위치에서의 최대 상관계수 추출 및 정규화 [-1, 1]
-    max_corr: float = np.max(xcorr) / (norm1 * norm2)
-    return max_corr
+    return np.max(xcorr) / (norm1 * norm2)
+
+
+def compute_normalized_xcorr(A1: np.ndarray, A2: np.ndarray) -> float:
+    """FFT를 이용해 이동 불변 최대 교차 상관계수(유사도)를 계산합니다."""
+    norm1: np.floating[Any] = np.linalg.norm(A1)
+    norm2: np.floating[Any] = np.linalg.norm(A2)
+    if norm1 == 0 or norm2 == 0:
+        return 0.0
+    return _xcorr_peak(fftn(A1), fftn(A2), norm1, norm2)
 
 
 def filter_twin_solutions(amplitudes: list[np.ndarray]):
@@ -28,11 +27,15 @@ def filter_twin_solutions(amplitudes: list[np.ndarray]):
     N: int = len(amplitudes)
     similarity_matrix: np.ndarray = np.zeros((N, N))
 
+    # 맵마다 FFT와 norm을 한 번만 계산한다 (쌍마다 다시 계산하면 FFT가 N(N-1)번)
+    norms: list[float] = [np.linalg.norm(a) for a in amplitudes]
+    spectra: list[np.ndarray] = [fftn(a) for a in amplitudes]
+
     # 1. N x N 유사도 행렬 계산 (대칭 행렬이므로 절반만 계산)
     for i in range(N):
         similarity_matrix[i, i] = 1.0
         for j in range(i + 1, N):
-            score: float = compute_normalized_xcorr(amplitudes[i], amplitudes[j])
+            score: float = _xcorr_peak(spectra[i], spectra[j], norms[i], norms[j])
             similarity_matrix[i, j] = score
             similarity_matrix[j, i] = score
 
