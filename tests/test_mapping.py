@@ -34,7 +34,9 @@ def test_extract_peaks_recovers_streak_direction():
     vol, d = streak_volume([1, 2, 2], blob=False)
     com = np.array(center_of_mass(vol))
     _, hist, u_edges, phi_edges = map2spherical(vol, com, bins=100)
-    peaks = extract_peak_from_2d_map(hist, u_edges, phi_edges, eps=0.2, min_samples=1, threshold_rel=0.3)
+    peaks = extract_peak_from_2d_map(
+        hist, u_edges, phi_edges, eps=0.2, min_samples=1, threshold_rel=0.3
+    )
     assert len(peaks) == 2
     cos = np.sort(peaks @ d)
     assert cos[0] < -0.98 and cos[1] > 0.98
@@ -72,7 +74,11 @@ def test_qspace_params_and_resampling():
 
 
 def test_orientation_map_finds_in_plane_streak():
-    from cxd.mapping.qspace import extract_orientation_map, find_robust_peaks, get_radial_mask_radius
+    from cxd.mapping.qspace import (
+        extract_orientation_map,
+        find_robust_peaks,
+        get_radial_mask_radius,
+    )
 
     vol, _ = streak_volume([0, 0, 1])  # along x: theta = pi/2, phi = 0 and pi
     com = np.array(center_of_mass(vol))

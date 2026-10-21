@@ -36,19 +36,22 @@ dev = [
 [tool.ruff]
 line-length = 100
 
+[tool.ruff.lint]
+extend-select = ["I", "UP", "B"]
+
 # violations present when ruff became mandatory in CI; remove entries as they are fixed
 [tool.ruff.lint.extend-per-file-ignores]
 "notebooks/notebook.ipynb" = ["I001"]
-"notebooks/streak_mapping.ipynb" = ["F811", "F841", "I001", "RUF059"]
-"scripts/analyze_raw.py" = ["C417", "I001", "RUF059"]
+"notebooks/streak_mapping.ipynb" = ["B007", "B905", "F811", "F841", "I001", "RUF059"]
+"scripts/analyze_raw.py" = ["B905", "C417", "I001", "RUF059"]
 "scripts/orientation_map.py" = ["I001"]
 "scripts/streak_profiles.py" = ["RUF059"]
 "src/cxd/core/statistics.py" = ["I001"]
 "src/cxd/core/transform.py" = ["RUF059"]
 "src/cxd/gam_del.py" = ["I001", "RUF059"]
 "src/cxd/mapping/orientation_view.py" = ["I001"]
-"src/cxd/mapping/profiles.py" = ["RUF059"]
-"src/cxd/mapping/vtk_view.py" = ["I001"]
+"src/cxd/mapping/profiles.py" = ["B905", "RUF059"]
+"src/cxd/mapping/vtk_view.py" = ["B007", "I001"]
 "src/cxd/twin_finder.py" = ["I001"]
 "tests/conftest.py" = ["I001"]
 "tests/test_mapping.py" = ["I001", "RUF059"]

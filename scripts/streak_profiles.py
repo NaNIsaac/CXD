@@ -15,11 +15,15 @@ def main():
     parser = argparse.ArgumentParser(
         description="Streak directions of a BCDI ROI stack: line profiles (plot_<stem>.png) and a 3D view (vtk_<stem>.png)."
     )
-    parser.add_argument("mat_files", type=Path, nargs="+", help="ROI .mat files with 'data' (y, x, frame)")
+    parser.add_argument(
+        "mat_files", type=Path, nargs="+", help="ROI .mat files with 'data' (y, x, frame)"
+    )
     parser.add_argument("--save-dir", type=Path, default=Path("."))
     parser.add_argument("--energy", type=float, default=5.55, help="keV")
     parser.add_argument("--rocking-step", type=float, default=0.8 / 120, help="deg per frame")
-    parser.add_argument("--distance", type=float, default=0.511, help="sample-detector distance [m]")
+    parser.add_argument(
+        "--distance", type=float, default=0.511, help="sample-detector distance [m]"
+    )
     parser.add_argument("--gamma", type=float, default=0.0, help="deg")
     parser.add_argument("--delta", type=float, default=69.0, help="deg")
     parser.add_argument("--pixel", type=float, default=5.5e-5, help="pixel size [m]")
@@ -53,7 +57,15 @@ def main():
         results = get_symmetric_profiles(imgs, com, peaks, length=50, thickness=3)
         fig = plot_origin_style(results, show=False)
         fig.savefig(args.save_dir / f"plot_{data_file.stem}.png", dpi=300, bbox_inches="tight")
-        vtk_visualize_cxd(imgs, com, results, peaks, B_recip, save_path=args.save_dir / f"vtk_{data_file.stem}.png", show=False)
+        vtk_visualize_cxd(
+            imgs,
+            com,
+            results,
+            peaks,
+            B_recip,
+            save_path=args.save_dir / f"vtk_{data_file.stem}.png",
+            show=False,
+        )
 
 
 if __name__ == "__main__":

@@ -19,7 +19,7 @@ def calculate_q_geometry(delta, gamma, energy_kev, g_off=0.0, d_off=0.0):
 
 
 def gaussian(x, a, xc, sigma, y0):
-    return y0 + a * np.exp(-(x - xc)**2 / (2 * sigma**2))
+    return y0 + a * np.exp(-((x - xc) ** 2) / (2 * sigma**2))
 
 
 def fit_gaussian_fwhm(x, y):
@@ -27,16 +27,20 @@ def fit_gaussian_fwhm(x, y):
     if len(y) < 4:
         return np.nan
 
-    p0 = [np.max(y)-np.min(y), x[np.argmax(y)], (np.max(x)-np.min(x))/10.0, np.min(y)]
+    p0 = [np.max(y) - np.min(y), x[np.argmax(y)], (np.max(x) - np.min(x)) / 10.0, np.min(y)]
 
     popt, _ = curve_fit(gaussian, x, y, p0=p0, maxfev=2000)
     return 2.3548 * abs(popt[2])
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Gaussian FWHM of rocking scans vs Q, one series per scan-list CSV.")
+    parser = argparse.ArgumentParser(
+        description="Gaussian FWHM of rocking scans vs Q, one series per scan-list CSV."
+    )
     parser.add_argument("spec_file", type=Path)
-    parser.add_argument("csv_files", type=Path, nargs="+", help="headerless CSV: scan, gamma, delta, theta")
+    parser.add_argument(
+        "csv_files", type=Path, nargs="+", help="headerless CSV: scan, gamma, delta, theta"
+    )
     parser.add_argument("--labels", nargs="+", help="one legend label per CSV (default: file stem)")
     parser.add_argument("--energy", type=float, default=5.55, help="keV")
     parser.add_argument("--gamma-offset", type=float, default=1.4367, help="deg")
@@ -54,12 +58,17 @@ def main():
             group_results = []
 
             for _, row in csv_df.iterrows():
-                scan = spec.get_scan(int(row['scan']))
+                scan = spec.get_scan(int(row["scan"]))
                 if not scan.data:
                     continue
 
-                q_val = calculate_q_geometry(row['delta'], row['gamma'], args.energy,
-                                             g_off=args.gamma_offset, d_off=args.delta_offset)
+                q_val = calculate_q_geometry(
+                    row["delta"],
+                    row["gamma"],
+                    args.energy,
+                    g_off=args.gamma_offset,
+                    d_off=args.delta_offset,
+                )
 
                 df_spec = scan.to_dataframe()
                 x_data = df_spec.iloc[:, 0].values.astype(float)
@@ -68,16 +77,19 @@ def main():
                 fwhm = fit_gaussian_fwhm(x_data, y_data)
 
                 if not np.isnan(fwhm):
-                    group_results.append({'q': q_val, 'fwhm': fwhm, "intensity": sum(y_data)})
+                    group_results.append({"q": q_val, "fwhm": fwhm, "intensity": sum(y_data)})
 
             if group_results:
-                res_df = pd.DataFrame(group_results).sort_values('q')
-                plt.scatter(res_df['q'], res_df['fwhm'], label=label, s=50, edgecolors='k')
+                res_df = pd.DataFrame(group_results).sort_values("q")
+                plt.scatter(res_df["q"], res_df["fwhm"], label=label, s=50, edgecolors="k")
 
     plt.xlabel(r"$Q$ ($\AA^{-1}$)", fontsize=13)
     plt.ylabel(r"fwhm ($^\circ$)", fontsize=13)
-    plt.title(fr"Broadening (Offsets: $\gamma={args.gamma_offset}^\circ, \delta={args.delta_offset}^\circ$)", fontsize=13)
-    plt.grid(True, linestyle=':', alpha=0.6)
+    plt.title(
+        rf"Broadening (Offsets: $\gamma={args.gamma_offset}^\circ, \delta={args.delta_offset}^\circ$)",
+        fontsize=13,
+    )
+    plt.grid(True, linestyle=":", alpha=0.6)
     plt.legend()
     plt.tight_layout()
     if args.save:
@@ -86,5 +98,5 @@ def main():
         plt.show()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

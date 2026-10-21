@@ -73,9 +73,7 @@ def extract_peak_from_2d_map(
     v_pts = np.stack([nz, ny, nx], axis=1)  # (N_points, 3)
 
     # 4. 3D 벡터 공간에서 클러스터링 (주기성 자동 해결)
-    clustering = DBSCAN(eps=eps, min_samples=min_samples).fit(
-        v_pts, sample_weight=w_val
-    )
+    clustering = DBSCAN(eps=eps, min_samples=min_samples).fit(v_pts, sample_weight=w_val)
     labels = clustering.labels_
 
     peak_vectors = []

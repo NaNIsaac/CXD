@@ -4,7 +4,10 @@ from pathlib import Path
 from qorageom.io import load_mat
 from scipy import ndimage
 
-from cxd.mapping.orientation_view import plot_3d_pattern_with_orientations, plot_full_lambert_projection
+from cxd.mapping.orientation_view import (
+    plot_3d_pattern_with_orientations,
+    plot_full_lambert_projection,
+)
 from cxd.mapping.qspace import (
     calculate_qspace_params,
     correct_to_qspace,

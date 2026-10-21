@@ -10,10 +10,14 @@ plt.rcParams["axes.labelweight"] = "bold"
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Normalized rocking curves (counter vs first column) of SPEC scans, log scale.")
+    parser = argparse.ArgumentParser(
+        description="Normalized rocking curves (counter vs first column) of SPEC scans, log scale."
+    )
     parser.add_argument("spec_file", type=Path)
     parser.add_argument("scans", type=int, nargs="+")
-    parser.add_argument("--labels", nargs="+", help="one legend label per scan (default: scan number)")
+    parser.add_argument(
+        "--labels", nargs="+", help="one legend label per scan (default: scan number)"
+    )
     parser.add_argument("--counter", default="imroi1")
     parser.add_argument("--save", type=Path, help="write the figure here instead of showing it")
     args = parser.parse_args()
@@ -31,20 +35,13 @@ def main() -> None:
             ax.plot(theta, intensity / intensity.max(), label=label)
 
     border_width = 2.0
-    for side in ['top', 'bottom', 'left', 'right']:
+    for side in ["top", "bottom", "left", "right"]:
         ax.spines[side].set_linewidth(border_width)
 
-    ax.set_xlabel("$\\omega [\\circ]$", fontsize=14, fontweight='bold')
-    ax.set_ylabel("Intensity [A.U]", fontsize=14, fontweight='bold')
-    ax.set_yscale('log')
-    ax.tick_params(
-        direction='in',
-        length=6,
-        width=border_width,
-        labelsize=12,
-        top=True,
-        right=True
-    )
+    ax.set_xlabel("$\\omega [\\circ]$", fontsize=14, fontweight="bold")
+    ax.set_ylabel("Intensity [A.U]", fontsize=14, fontweight="bold")
+    ax.set_yscale("log")
+    ax.tick_params(direction="in", length=6, width=border_width, labelsize=12, top=True, right=True)
     ax.legend(frameon=True, fontsize=12)
 
     if args.save:
@@ -53,5 +50,5 @@ def main() -> None:
         plt.show()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

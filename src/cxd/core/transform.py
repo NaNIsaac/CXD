@@ -4,11 +4,11 @@ from qorageom import wavelength
 
 def correct_rocking(
     frames: np.ndarray,
-    beam_center: np.ndarray, # [omega_idx, y_idx, x_idx]
+    beam_center: np.ndarray,  # [omega_idx, y_idx, x_idx]
     thetas: np.ndarray,
     sdd: float,
     beam_energy: float,
-    pixel_size: float
+    pixel_size: float,
 ) -> np.ndarray:
     """
     frames: 3D array of shape (num_omega, ny, nx)
@@ -20,42 +20,42 @@ def correct_rocking(
     """
     if frames.ndim != 3:
         raise ValueError(f"Frames must be a 3D array. Got shape {frames.shape}.")
-    
+
     num_omega, ny, nx = frames.shape
     wavelen: float = wavelength(beam_energy)
     k0: float = 2 * np.pi / wavelen
-    
+
     if num_omega != len(thetas):
         raise ValueError(f"Depth of frames {num_omega} mismatch with theta length {len(thetas)}.")
 
     # 1. Float Origin 처리 (Interpolation for center theta)
     cen_omega_idx, cen_y, cen_x = beam_center[0], beam_center[1], beam_center[2]
-    
+
     # 실수 인덱스에 대응하는 theta 값을 선형 보간으로 추출
     # origin[0]이 1.5라면 thetas[1]과 [2]의 중간값 계산
     center_theta = np.interp(cen_omega_idx, np.arange(len(thetas)), thetas)
-    
+
     # 2. 2D Detector q_lab vector (Vectorized)
     y_idx, x_idx = np.indices((ny, nx))
     dy = (y_idx - cen_y) * pixel_size
     dx = (x_idx - cen_x) * pixel_size
-    
+
     dist = np.sqrt(dx**2 + dy**2 + sdd**2)
-    
+
     # kf_lab: (3, ny, nx)
     kf_lab = k0 * np.stack((dx / dist, dy / dist, sdd / dist), axis=0)
     ki_lab = np.array([0, 0, k0]).reshape(3, 1, 1)
-    
-    q_lab = kf_lab - ki_lab  
-    q_lab_flat = q_lab.reshape(3, -1) # (3, ny*nx)
-    
+
+    q_lab = kf_lab - ki_lab
+    q_lab_flat = q_lab.reshape(3, -1)  # (3, ny*nx)
+
     # 3. Rocking Angle Transformation (q_lab -> q_crystal)
     # Relative rotation based on the center_theta
     omegas = np.deg2rad(thetas - center_theta)
-    
+
     cos_w = np.cos(-omegas)
     sin_w = np.sin(-omegas)
-    
+
     # Rotation Matrix (y-axis rotation assumed)
     # R_inv: (num_omega, 3, 3)
     R_inv = np.zeros((num_omega, 3, 3))
@@ -64,22 +64,18 @@ def correct_rocking(
     R_inv[:, 1, 1] = 1.0
     R_inv[:, 2, 0] = -sin_w
     R_inv[:, 2, 2] = cos_w
-    
+
     # q_crystal: (num_omega, 3, ny*nx)
-    q_crystal = np.einsum('oij,jk->oik', R_inv, q_lab_flat)
-    
+    q_crystal = np.einsum("oij,jk->oik", R_inv, q_lab_flat)
+
     # q_crystal_points: (num_omega * ny * nx, 3)
     q_crystal_points = np.transpose(q_crystal, (0, 2, 1)).reshape(-1, 3)
     intensities = frames.ravel()
-    
+
     # 4. Regridding
     # bins 설정 시 데이터의 범위를 자동으로 잡거나 hyperparameter로 관리 필요
-    bins = [num_omega, ny, nx] 
-    
-    regridded_q_space, edges = np.histogramdd(
-        q_crystal_points, 
-        bins=bins, 
-        weights=intensities
-    )
-    
+    bins = [num_omega, ny, nx]
+
+    regridded_q_space, edges = np.histogramdd(q_crystal_points, bins=bins, weights=intensities)
+
     return regridded_q_space

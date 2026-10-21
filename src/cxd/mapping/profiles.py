@@ -20,17 +20,13 @@ def get_thick_line_profile(
     # 여기서는 간단하게 중심 주변의 정수 오프셋 범위를 생성합니다.
     offsets = np.arange(-thickness, thickness + 1)
     oz, oy, ox = np.meshgrid(offsets, offsets, offsets, indexing="ij")
-    offsets_vec = np.stack(
-        [oz.ravel(), oy.ravel(), ox.ravel()], axis=1
-    )  # (N_offsets, 3)
+    offsets_vec = np.stack([oz.ravel(), oy.ravel(), ox.ravel()], axis=1)  # (N_offsets, 3)
 
     # 3. 모든 샘플링 포인트에 대해 오프셋 적용
     # 결과 구조: (N_offsets, length, 3)
     # P(t) = CoM + t*n + Offset
     line_points = com + t[:, None] * direction  # (length, 3)
-    all_points = (
-        line_points[None, :, :] + offsets_vec[:, None, :]
-    )  # (N_offsets, length, 3)
+    all_points = line_points[None, :, :] + offsets_vec[:, None, :]  # (N_offsets, length, 3)
 
     # 4. map_coordinates를 위해 차원 재조정 (3, N_total_points)
     flat_points = all_points.reshape(-1, 3).T
@@ -71,12 +67,8 @@ def get_symmetric_profiles(imgs, com, peak_vectors, length=50, thickness=2):
             used[i] = used[best_j] = True
 
             # i 방향(+축)과 best_j 방향(-축) 프로파일 추출
-            pos_profile = get_thick_line_profile(
-                imgs, com, peak_vectors[i], length, thickness
-            )
-            neg_profile = get_thick_line_profile(
-                imgs, com, peak_vectors[best_j], length, thickness
-            )
+            pos_profile = get_thick_line_profile(imgs, com, peak_vectors[i], length, thickness)
+            neg_profile = get_thick_line_profile(imgs, com, peak_vectors[best_j], length, thickness)
 
             # neg_profile을 뒤집어서 하나의 축으로 합침
             # [-length, ..., 0, ..., +length]
@@ -123,9 +115,7 @@ def plot_paired_lines_subplots(combined_results):
         ax.axvline(0, color="white", linestyle="--", alpha=0.3)
 
         # 서브플롯별 설정
-        ax.set_title(
-            f"Reciprocal Axis {i + 1} (Dot Product: {res['dot']:.4f})", fontsize=12
-        )
+        ax.set_title(f"Reciprocal Axis {i + 1} (Dot Product: {res['dot']:.4f})", fontsize=12)
         ax.set_ylabel("Intensity")
         ax.grid(True, which="both", alpha=0.1)
         ax.legend(loc="upper right")
@@ -140,33 +130,38 @@ def plot_paired_lines_subplots(combined_results):
 def plot_origin_style(combined_results, show=True) -> plt.Figure:
     num_axes = len(combined_results)
     fig, axes = plt.subplots(num_axes, 1, figsize=(8, 4 * num_axes), sharex=True)
-    
+
     if num_axes == 1:
         axes = [axes]
-    
+
     # Origin 느낌의 뚜렷한 컬러맵 (Tableau10 등 추천)
-    colors = ['#1f77b4', '#ff7f0e', '#2ca02c'] 
+    colors = ["#1f77b4", "#ff7f0e", "#2ca02c"]
 
     for i, (ax, res) in enumerate(zip(axes, combined_results)):
         p1, p2 = res["pair"]
-        
+
         # 1. 메인 데이터 플롯
-        ax.plot(res["dist"], res["profile"], color=colors[i % 3], lw=2, 
-                label=f"Axis {i+1} (Peaks {p1+1}-{p2+1})")
-        
+        ax.plot(
+            res["dist"],
+            res["profile"],
+            color=colors[i % 3],
+            lw=2,
+            label=f"Axis {i + 1} (Peaks {p1 + 1}-{p2 + 1})",
+        )
+
         # 2. 중심 가이드 라인 (Origin은 보통 검은 점선이나 실선 사용)
         ax.axvline(0, color="black", lw=1, ls="--", alpha=0.5)
 
         # 3. Origin 세부 설정: Ticks 방향 및 테두리 강조
-        ax.tick_params(which='both', width=1.5, length=6)
-        ax.tick_params(which='minor', length=3) # 보조 tick도 원한다면
-        
-        ax.set_ylabel("Intensity (a.u.)", fontweight='bold')
-        ax.legend(frameon=False, loc="upper right") # Origin은 대개 legend 테두리 없음
-        ax.set_title(f"Reciprocal Axis {i+1}", pad=10)
+        ax.tick_params(which="both", width=1.5, length=6)
+        ax.tick_params(which="minor", length=3)  # 보조 tick도 원한다면
 
-    axes[-1].set_xlabel("Distance from CoM (pixels)", fontweight='bold')
-    
+        ax.set_ylabel("Intensity (a.u.)", fontweight="bold")
+        ax.legend(frameon=False, loc="upper right")  # Origin은 대개 legend 테두리 없음
+        ax.set_title(f"Reciprocal Axis {i + 1}", pad=10)
+
+    axes[-1].set_xlabel("Distance from CoM (pixels)", fontweight="bold")
+
     plt.tight_layout()
     if show:
         plt.show()

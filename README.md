@@ -29,8 +29,8 @@ from cxd.core.spec import Spec, get_positions
 
 with Spec("examples/data/synthetic.spec") as sp:
     scan = sp.get_scan(1)
-    scan.motors          # {"Theta": ..., "Delta": ..., "Gamma": ...}
-    scan.sdd             # sample-detector distance from #UXML
+    scan.motors  # {"Theta": ..., "Delta": ..., "Gamma": ...}
+    scan.sdd  # sample-detector distance from #UXML
     df = scan.to_dataframe()
 ```
 

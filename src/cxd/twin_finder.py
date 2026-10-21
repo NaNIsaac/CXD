@@ -3,6 +3,7 @@ import numpy as np
 from scipy.fft import fftn, ifftn
 from sklearn.cluster import KMeans
 
+
 def compute_normalized_xcorr(A1: np.ndarray, A2: np.ndarray) -> float:
     """FFT를 이용해 이동 불변 최대 교차 상관계수(유사도)를 계산합니다."""
     # 정규화를 위한 분산 계산 (L2 norm)
@@ -20,6 +21,7 @@ def compute_normalized_xcorr(A1: np.ndarray, A2: np.ndarray) -> float:
     # 정렬이 최적화된 위치에서의 최대 상관계수 추출 및 정규화 [-1, 1]
     max_corr: float = np.max(xcorr) / (norm1 * norm2)
     return max_corr
+
 
 def filter_twin_solutions(amplitudes: list[np.ndarray]):
     """수십 개의 진폭 맵 리스트를 받아 True/Twin 그룹을 분리합니다."""
