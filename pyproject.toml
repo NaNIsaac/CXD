@@ -30,6 +30,7 @@ dev = [
     "ipykernel>=7.2.0",
     "pytest>=9.0.3",
     "pyvista[jupyter]>=0.47.3",
+    "qoraphase>=0.2",
     "ruff>=0.15.10",
 ]
 

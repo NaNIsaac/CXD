@@ -44,6 +44,35 @@ q = correct_rocking(frames, beam_center, thetas, sdd, beam_energy, pixel_size)
 visualize_q_space_vtk(q, mode="contour", log=True)
 ```
 
+`correct_rocking` is a rough view only: it ignores 2θ, δ and γ, does not return the q
+coordinates of its bins, and cannot tell empty bins from zero counts. Do not feed its output to
+phase retrieval.
+
+Hand a rocking stack to [QoraPhase](https://github.com/NaNIsaac/QoraPhase) in detector frame
+instead:
+
+```python
+import qoraphase as qp
+from cxd.core.handoff import to_qoraphase
+
+intensity, mask, offset = to_qoraphase(stack, 64, bad=gaps)  # stack: (frame, y, x) counts
+result = qp.CDI(intensity=intensity, mask=mask).reconstruct(recipe)
+```
+
+| | CXD side | QoraPhase side |
+|---|---|---|
+| Axes | `(frame, y, x)`: rocking first, detector rows, detector columns | any 3D shape; no axis meaning |
+| Origin | Bragg peak anywhere in the stack | peak at index `n // 2` of each axis (`to_qoraphase` crops around it) |
+| Values | counts, any dtype | float intensity (not amplitude) |
+| Mask | `bad`: `True` = unusable (detector gaps, hot, saturated) | `mask`: `True` = unusable; NaN/Inf are refused even when masked, so masked voxels are zero-filled |
+| Negative / NaN / Inf | allowed in `stack` | masked by `to_qoraphase`, not clipped |
+| Coordinates | `offset` = first voxel of the crop in `stack` | none; the voxels stay detector-frame |
+
+`cxd.mapping.qspace` uses the opposite mask polarity (`True` = kept). The reciprocal-space basis
+of the detector-frame voxels (from the SPEC geometry, e.g. QoraGeom) is not computed here and has
+to be kept with the result to map the reconstruction to lab or sample axes.
+`tests/test_handoff.py` reconstructs a synthetic scan through this path.
+
 Scripts take their inputs as arguments (`--help` lists them). Run from the repo root:
 
 ```
@@ -60,6 +89,7 @@ uv run python -m cxd.gam_del <specfile> <run> [<run> ...]
 
 - `src/cxd/core/spec.py` - `get_positions`; `Spec`, `SpecScan` from `qorageom.spec`
 - `src/cxd/core/transform.py` - rocking-angle correction and q-space regridding
+- `src/cxd/core/handoff.py` - `to_qoraphase`: detector-frame crop and mask for QoraPhase
 - `src/cxd/core/visualize.py` - PyVista 3D q-space viewer
 - `src/cxd/mapping/spherical.py` - (cos θ, φ) histogram around the CoM, DBSCAN streak directions
 - `src/cxd/mapping/profiles.py` - thick line profiles along paired opposite directions
