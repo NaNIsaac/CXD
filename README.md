@@ -18,11 +18,17 @@ uv sync
 
 The SPEC parser, frame loaders and geometry live in [QoraGeom](https://github.com/NaNIsaac/QoraGeom) (`qorageom`), installed from git as a dependency. `cxd.core.spec` re-exports `Spec`, `SpecScan` and adds `get_positions`.
 
+No measured data ships with the repo. `examples/synthetic_scan.py` writes a synthetic rocking scan to `examples/data/`: a SPEC file (`synthetic.spec`, scan 1), its TIFF frames (`S0001/`) and the ROI stack as `.mat` (`scan_0001.mat`). The notebooks and the examples below use it.
+
+```
+uv run python examples/synthetic_scan.py
+```
+
 ```python
 from cxd.core.spec import Spec, get_positions
 
-with Spec("path/to/specfile") as sp:
-    scan = sp.get_scan(3105)
+with Spec("examples/data/synthetic.spec") as sp:
+    scan = sp.get_scan(1)
     scan.motors          # {"Theta": ..., "Delta": ..., "Gamma": ...}
     scan.sdd             # sample-detector distance from #UXML
     df = scan.to_dataframe()
@@ -41,13 +47,13 @@ visualize_q_space_vtk(q, mode="contour", log=True)
 Scripts take their inputs as arguments (`--help` lists them). Run from the repo root:
 
 ```
-uv run python -m scripts.prep_frames data/S3358 merged/scan_3358.npy
-uv run python -m scripts.analyze_raw <specfile> <data_dir> <npy_folder> 3105 3089
-uv run python -m scripts.rocking_curve <specfile> 1104 879 --save rc.png
-uv run python -m scripts.fwhm_vs_q <specfile> data1.csv data2.csv --energy 5.55
-uv run python -m scripts.streak_profiles scan_0255.mat --save-dir out --energy 5.55 --delta 69
-uv run python -m scripts.orientation_map scan_0255.mat --energy 5.55 --tth 59 --sdd 5110
-uv run python -m cxd.gam_del <specfile> 3884 3893 3913
+uv run python -m scripts.prep_frames examples/data/S0001 examples/data/scan_0001.npy
+uv run python -m scripts.rocking_curve examples/data/synthetic.spec 1 --save rc.png
+uv run python -m scripts.streak_profiles examples/data/scan_0001.mat --save-dir out --energy 8 --delta 60
+uv run python -m scripts.orientation_map <roi.mat> --energy <keV> --tth <deg> --sdd <mm>
+uv run python -m scripts.analyze_raw <specfile> <data_dir> <npy_folder> <run> [<run> ...]
+uv run python -m scripts.fwhm_vs_q <specfile> <list1.csv> [<list2.csv> ...] --energy <keV>
+uv run python -m cxd.gam_del <specfile> <run> [<run> ...]
 ```
 
 ## Structure
