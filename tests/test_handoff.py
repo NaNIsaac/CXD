@@ -21,6 +21,7 @@ def diffraction(obj):
 
 def similarity(a, b):
     """Peak normalised cross-correlation of the magnitudes, allowing the twin."""
+
     def peak(x, y):
         return np.abs(np.fft.ifftn(np.fft.fftn(x) * np.conj(np.fft.fftn(y)))).max()
 
