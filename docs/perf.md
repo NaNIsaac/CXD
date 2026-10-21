@@ -2,7 +2,7 @@
 
 Reproduce with `uv run python scripts/bench_rsm.py --repeat 5`. The volume is synthetic (a
 Gaussian Bragg peak, Poisson sampled, seed 0, float64), so nothing measured is needed. Geometry:
-sdd 500 mm, pixel 0.055 mm, 9 keV, 0.01 deg per frame. Machine: AMD Ryzen (12 logical cores),
+sdd 500 mm, pixel 0.055 mm, 9 keV, 0.01 deg per frame. Machine: AMD64 Family 25 Model 97 (12 logical cores),
 RTX 5070, Windows 11, Python 3.13, NumPy/SciPy from `uv.lock`. Times are the best of 5 runs;
 peak memory is from `tracemalloc` (it sees NumPy allocations, not the interpreter).
 
@@ -37,8 +37,8 @@ and the staged copy equals `correct_rocking` bit for bit.
 
 - `np.histogramdd` is about 80 % of the regridding at medium and large scale. It is single
   threaded and works on an (N, 3) float64 point array: 340 MiB of points for 14 M voxels, plus the
-  `einsum` output and the transposed copy. Peak memory is about 12 bytes x 8 x N, i.e. 1.3 GiB at
-  14 M voxels, and grows linearly with voxel count.
+  `einsum` output and the transposed copy. Peak memory is about 98 bytes per voxel (12 float64 values), i.e.
+  1.3 GiB at 14 M voxels, and grows linearly with voxel count.
 - The detector geometry (`q_lab`) is a fixed 2D computation and is negligible; the rotation is a
   few percent.
 - `get_full_spherical_map` is nearly independent of volume size: its cost is set by the
