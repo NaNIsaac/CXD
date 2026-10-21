@@ -1,6 +1,6 @@
 # CXD
 
-[![Tests](https://github.com/NaNIsaac/CXD/actions/workflows/tests.yml/badge.svg)](https://github.com/NaNIsaac/CXD/actions/workflows/tests.yml) [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+[![Tests](https://github.com/NaNIsaac/CXD/actions/workflows/ci.yml/badge.svg)](https://github.com/NaNIsaac/CXD/actions/workflows/ci.yml) [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
 **Analysis code for coherent X-ray diffraction (CXD) data: SPEC file parsing, Timepix TIFF frame loading, rocking-curve to q-space regridding, and 3D q-space visualization.**
 
