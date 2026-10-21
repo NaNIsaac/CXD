@@ -10,3 +10,6 @@ wheels/
 .venv
 
 .claude/
+
+# Output of examples/synthetic_scan.py
+examples/data/
