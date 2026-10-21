@@ -1,3 +1,5 @@
+import warnings
+
 import numpy as np
 from qorageom import wavelength
 
@@ -18,6 +20,12 @@ def correct_rocking(
     beam_energy: X-ray beam energy [keV]
     pixel_size: size of each pixel in [mm]
     """
+    warnings.warn(
+        "correct_rocking ignores the detector angles (CXD#10) and is kept to reproduce old "
+        "analyses; use cxd.core.rocking.map_rocking_scan",
+        DeprecationWarning,
+        stacklevel=2,
+    )
     if frames.ndim != 3:
         raise ValueError(f"Frames must be a 3D array. Got shape {frames.shape}.")
 
