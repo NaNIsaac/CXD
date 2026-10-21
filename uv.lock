@@ -2187,7 +2187,7 @@ wheels = [
 [[package]]
 name = "qorageom"
 version = "0.1.0"
-source = { git = "https://github.com/NaNIsaac/QoraGeom#adcc1801a9a3a7a7ecb579bb3db5290a275e8185" }
+source = { git = "https://github.com/NaNIsaac/QoraGeom#21ff8d2df6c92b10dc020d381c26c382fe8c6e40" }
 dependencies = [
     { name = "numpy" },
     { name = "scipy" },
