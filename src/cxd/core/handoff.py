@@ -18,6 +18,7 @@ def to_qoraphase(
     size: int | tuple[int, int, int],
     bad: np.ndarray | None = None,
     center: tuple[int, int, int] | None = None,
+    frames: int | None = None,
 ) -> tuple[np.ndarray, np.ndarray, tuple[int, int, int]]:
     """Crop ``stack`` around the Bragg peak into QoraPhase's input arrays.
 
@@ -25,6 +26,7 @@ def to_qoraphase(
     size: crop size, one int for a cube or one per axis
     bad: ``True`` where a pixel is unusable (gaps, hot, saturated)
     center: peak position; defaults to the brightest valid voxel
+    frames: number of rocking steps in the scan; if given, axis 0 must have this length
 
     Returns ``(intensity, mask, offset)``: float64 intensity with the peak at
     ``n // 2`` of each axis and unusable voxels set to 0, the mask (``True`` =
@@ -34,6 +36,11 @@ def to_qoraphase(
     stack = np.asarray(stack, dtype=np.float64)
     if stack.ndim != 3:
         raise ValueError(f"stack must be (frame, y, x); got shape {stack.shape}")
+    if frames is not None and stack.shape[0] != frames:
+        raise ValueError(
+            f"stack axis 0 has {stack.shape[0]} entries but the scan has {frames} frames; "
+            "is it (y, x, frame), as in the .mat files?"
+        )
     shape = (size,) * 3 if isinstance(size, int) else tuple(size)
     if len(shape) != 3 or min(shape) < 1:
         raise ValueError(f"size must be a positive int or three of them; got {size}")
@@ -60,4 +67,10 @@ def to_qoraphase(
 
     crop = tuple(slice(o, o + n) for o, n in zip(offset, shape, strict=True))
     mask = invalid[crop]
+    # cxd.mapping.qspace masks are True = kept; passed here they mark most voxels bad
+    if mask.mean() > 0.5:
+        raise ValueError(
+            f"{mask.mean():.0%} of the crop is marked unusable; check the mask "
+            "polarity (here True = unusable)"
+        )
     return np.where(mask, 0.0, stack[crop]), mask, offset
