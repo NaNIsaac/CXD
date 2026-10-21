@@ -46,8 +46,10 @@ def to_qoraphase(
     if invalid.all():
         raise ValueError("every voxel is unusable")
 
-    peak = center if center is not None else np.unravel_index(
-        np.argmax(np.where(invalid, -np.inf, stack)), stack.shape
+    peak = (
+        center
+        if center is not None
+        else np.unravel_index(np.argmax(np.where(invalid, -np.inf, stack)), stack.shape)
     )
     offset = tuple(int(c) - n // 2 for c, n in zip(peak, shape, strict=True))
     if any(o < 0 or o + n > s for o, n, s in zip(offset, shape, stack.shape, strict=True)):
