@@ -8,10 +8,27 @@ In a Bragg coherent X-ray diffraction (BCDI) measurement a small crystal is rock
 
 ## Install
 
-Requires [uv](https://docs.astral.sh/uv/) and Python 3.13.
+Requires [uv](https://docs.astral.sh/uv/) and Python 3.13 (uv fetches it if missing).
+
+**1. Clone the repo**
 
 ```
+git clone https://github.com/NaNIsaac/CXD
+cd CXD
+```
+
+**2. Install the dependencies**
+
+<!-- test -->
+```sh
 uv sync
+```
+
+**3. Check that the package imports**
+
+<!-- test -->
+```sh
+uv run python -c "import cxd, qorageom"
 ```
 
 ## Usage
@@ -20,7 +37,8 @@ The SPEC parser, frame loaders and geometry live in [QoraGeom](https://github.co
 
 No measured data ships with the repo. `examples/synthetic_scan.py` writes a synthetic rocking scan to `examples/data/`: a SPEC file (`synthetic.spec`, scan 1), its TIFF frames (`S0001/`) and the ROI stack as `.mat` (`scan_0001.mat`). The notebooks and the examples below use it.
 
-```
+<!-- test -->
+```sh
 uv run python examples/synthetic_scan.py
 ```
 
