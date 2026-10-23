@@ -8,7 +8,7 @@ In a Bragg coherent X-ray diffraction (BCDI) measurement a small crystal is rock
 
 ## Install
 
-Requires [uv](https://docs.astral.sh/uv/) and Python 3.13 (uv fetches it if missing).
+Requires [uv](https://docs.astral.sh/uv/) and Python 3.13 (uv fetches it if missing). Not on PyPI yet: the first release will add `pip install cxd`, after QoraGeom is released.
 
 **1. Clone the repo**
 
