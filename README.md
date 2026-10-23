@@ -55,19 +55,29 @@ with Spec("examples/data/synthetic.spec") as sp:
 Regrid a rocking scan into q-space and view it:
 
 ```python
-from cxd.core.transform import correct_rocking
+from cxd.core.rocking import map_rocking_scan
 from cxd.core.visualize import visualize_q_space_vtk
 
-q = correct_rocking(frames, beam_center, thetas, sdd, beam_energy, pixel_size)
-visualize_q_space_vtk(q, mode="contour", log=True)
+# frames (frame, y, x); thetas per frame and delta, gamma in degrees; sdd, pixel in mm
+m = map_rocking_scan(frames, thetas, delta, gamma, (frame0, y0, x0), sdd, pixel, energy_kev)
+visualize_q_space_vtk(m.intensity, mode="contour", log=True)
 ```
 
-`correct_rocking` is a rough view only: it ignores 2θ, δ and γ, does not return the q
-coordinates of its bins, and cannot tell empty bins from zero counts. Do not feed its output to
-phase retrieval.
+`map_rocking_scan` computes the q of every (frame, pixel) sample with
+[QoraGeom](https://github.com/NaNIsaac/QoraGeom)'s diffractometer conventions (34-ID-C by
+default: the detector turns delta about +y after gamma about −x, the sample rocks about th) and
+bins them without interpolation. It returns the mean intensity per bin, the number of samples per
+bin (`hits`, 0 = not measured) and the bin edges in 1/Å (2π included). The (frame, y, x) of the
+reference is the pixel the detector arm points at and the frame that defines the crystal frame.
+The lab directions of the detector columns and rows are an `orientation` argument and depend on
+the instrument.
 
-Hand a rocking stack to [QoraPhase](https://github.com/NaNIsaac/QoraPhase) in detector frame
-instead:
+The older `correct_rocking` puts the detector on the direct beam (it ignores 2θ, δ and γ), so
+the rocking sweep collapses ([#10](https://github.com/NaNIsaac/CXD/issues/10)). It still returns
+what it did, with a `DeprecationWarning`, so earlier analyses can be reproduced.
+
+Neither q-space grid is meant for phase retrieval. Hand the rocking stack to
+[QoraPhase](https://github.com/NaNIsaac/QoraPhase) in detector frame instead:
 
 ```python
 import qoraphase as qp
@@ -122,7 +132,8 @@ All test data is **synthetic**; no measured data ships with the repository.
 ## Structure
 
 - `src/cxd/core/spec.py` - `get_positions`; `Spec`, `SpecScan` from `qorageom.spec`
-- `src/cxd/core/transform.py` - rocking-angle correction and q-space regridding
+- `src/cxd/core/rocking.py` - rocking scan to q with the detector angles (QoraGeom), binned with edges
+- `src/cxd/core/transform.py` - `correct_rocking`, kept for reproducing earlier results
 - `src/cxd/core/handoff.py` - `to_qoraphase`: detector-frame crop and mask for QoraPhase
 - `src/cxd/core/visualize.py` - PyVista 3D q-space viewer
 - `src/cxd/mapping/spherical.py` - (cos θ, φ) histogram around the CoM, DBSCAN streak directions
