@@ -30,7 +30,7 @@ NUMERICAL = [
 PRESENTATION = {"matplotlib", "pyvista", "vtk"}
 # CXD modules that import qorageom, whose package init loads qorageom.spec through scan_geometry
 VIA_QORAGEOM = {"cxd.core.rocking", "cxd.core.transform", "cxd.mapping.qspace"}
-IMPORT_NAMES = {"roi-rectangle": "roi_rectangle", "scikit-learn": "sklearn"}
+IMPORT_NAMES = {"scikit-learn": "sklearn"}
 
 
 @cache
@@ -100,15 +100,6 @@ def runtime_dependencies() -> list[str]:
     ]
 
 
-SCRIPT_ONLY = strict_xfail("imported only by scripts/ or examples/, not by the package")
-
-
-@pytest.mark.parametrize(
-    "dist",
-    [
-        pytest.param(d, marks=SCRIPT_ONLY) if d in {"roi-rectangle", "tifffile"} else d
-        for d in runtime_dependencies()
-    ],
-)
+@pytest.mark.parametrize("dist", runtime_dependencies())
 def test_runtime_dependency_is_imported_by_the_package(dist):
     assert IMPORT_NAMES.get(dist, dist) in package_imports()

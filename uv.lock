@@ -510,10 +510,8 @@ dependencies = [
     { name = "pandas" },
     { name = "pyvista", extra = ["colormaps"] },
     { name = "qorageom" },
-    { name = "roi-rectangle" },
     { name = "scikit-learn" },
     { name = "scipy" },
-    { name = "tifffile" },
 ]
 
 [package.dev-dependencies]
@@ -524,6 +522,10 @@ dev = [
     { name = "qoraphase" },
     { name = "ruff" },
 ]
+scripts = [
+    { name = "roi-rectangle" },
+    { name = "tifffile" },
+]
 
 [package.metadata]
 requires-dist = [
@@ -532,10 +534,8 @@ requires-dist = [
     { name = "pandas", specifier = ">=3.0.2" },
     { name = "pyvista", extras = ["colormaps"], specifier = ">=0.47.3" },
     { name = "qorageom", git = "https://github.com/NaNIsaac/QoraGeom" },
-    { name = "roi-rectangle", specifier = ">=1.0.0" },
     { name = "scikit-learn", specifier = ">=1.8.0" },
     { name = "scipy", specifier = ">=1.17.1" },
-    { name = "tifffile", specifier = ">=2026.4.11" },
 ]
 
 [package.metadata.requires-dev]
@@ -545,6 +545,10 @@ dev = [
     { name = "pyvista", extras = ["jupyter"], specifier = ">=0.47.3" },
     { name = "qoraphase", specifier = ">=0.2" },
     { name = "ruff", specifier = ">=0.15.10" },
+]
+scripts = [
+    { name = "roi-rectangle", specifier = ">=1.0.0" },
+    { name = "tifffile", specifier = ">=2026.4.11" },
 ]
 
 [[package]]
