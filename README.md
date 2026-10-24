@@ -2,6 +2,10 @@
 
 [![Tests](https://github.com/NaNIsaac/CXD/actions/workflows/ci.yml/badge.svg)](https://github.com/NaNIsaac/CXD/actions/workflows/ci.yml) [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
+<img src="https://raw.githubusercontent.com/NaNIsaac/CXD/main/docs/media/rocking_q.png" width="720" alt="The synthetic rocking scan: one detector frame, the rocking curve, and the scan binned into q-space by map_rocking_scan">
+
+The synthetic scan from `examples/synthetic_scan.py`: a detector frame, the rocking curve and `map_rocking_scan` in q-space ([script](docs/media/make_figure.py)).
+
 **Analysis code for coherent X-ray diffraction (CXD) data: SPEC file parsing, Timepix TIFF frame loading, rocking-curve to q-space regridding, and 3D q-space visualization.**
 
 In a Bragg coherent X-ray diffraction (BCDI) measurement a small crystal is rocked through a Bragg reflection while an area detector records a coherent diffraction pattern at each angle; the stack of frames samples the 3D diffraction pattern around one reciprocal-lattice point. This package is for reducing such scans recorded with SPEC and a Timepix detector: it reads the scan metadata and frames, maps detector pixels and rocking angles to q, shows the result in 3D, finds facet/streak directions, and sorts reconstructed amplitudes into true and twin-image groups.
