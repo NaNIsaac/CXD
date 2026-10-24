@@ -21,10 +21,8 @@ dependencies = [
     "pandas>=3.0.2",
     "pyvista[colormaps]>=0.47.3",
     "qorageom>=0.1.0",
-    "roi-rectangle>=1.0.0",
     "scikit-learn>=1.8.0",
     "scipy>=1.17.1",
-    "tifffile>=2026.4.11",
 ]
 
 [project.urls]
@@ -45,6 +43,14 @@ dev = [
     "qoraphase>=0.2",
     "ruff>=0.15.10",
 ]
+# used by scripts/ and examples/ only, not by the package
+scripts = [
+    "roi-rectangle>=1.0.0",
+    "tifffile>=2026.4.11",
+]
+
+[tool.uv]
+default-groups = ["dev", "scripts"]
 
 # qorageom is not on PyPI yet; drop this entry once it is released
 [tool.uv.sources]
