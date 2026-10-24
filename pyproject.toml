@@ -1,7 +1,7 @@
 [project]
 name = "cxd"
 version = "0.1.0"
-description = "Analysis code for coherent X-ray diffraction (CXD) data: SPEC parsing, Timepix frame loading, q-space regridding and 3D visualization"
+description = "Analysis code for coherent X-ray diffraction (CXD) data: rocking scans to q-space, orientation and twin analysis, with a SPEC and detector-frame I/O layer and 3D views"
 readme = "README.md"
 license = "MIT"
 license-files = ["LICENSE*"]
@@ -18,12 +18,15 @@ classifiers = [
 dependencies = [
     "matplotlib>=3.10.8",
     "numpy>=2.4.4",
-    "pandas>=3.0.2",
     "pyvista[colormaps]>=0.47.3",
     "qorageom>=0.1.0",
     "scikit-learn>=1.8.0",
     "scipy>=1.17.1",
 ]
+
+[project.optional-dependencies]
+# cxd.io: SPEC positions as a DataFrame, TIFF and HDF5 frames
+io = ["h5py>=3.12", "pandas>=3.0.2", "tifffile>=2026.4.11"]
 
 [project.urls]
 Homepage = "https://github.com/NaNIsaac/CXD"
@@ -37,6 +40,7 @@ build-backend = "uv_build"
 
 [dependency-groups]
 dev = [
+    "h5py>=3.12",
     "ipykernel>=7.2.0",
     "pytest>=9.0.3",
     "pyvista[jupyter]>=0.47.3",
@@ -45,6 +49,7 @@ dev = [
 ]
 # used by scripts/ and examples/ only, not by the package
 scripts = [
+    "pandas>=3.0.2",
     "roi-rectangle>=1.0.0",
     "tifffile>=2026.4.11",
 ]

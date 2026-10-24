@@ -33,7 +33,7 @@ uv run python examples/synthetic_scan.py
 Read it back with the SPEC parser:
 
 ```python
-from cxd.core.spec import Spec
+from cxd.io.spec import Spec
 
 with Spec("examples/data/synthetic.spec") as sp:
     scan = sp.get_scan(1)

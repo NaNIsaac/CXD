@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 from roi_rectangle import RoiRectangle
 
 from cxd.core.constants import TIMEPIX_PIXEL_SIZE
-from cxd.core.spec import Spec, get_positions
+from cxd.io.spec import Spec, get_positions
 from cxd.core.statistics import get_com
 from scripts.prep_frames import merge_raw_tif_to_npy
 

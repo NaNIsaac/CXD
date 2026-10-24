@@ -6,8 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [0.1.0] - unreleased
 
-First version, installed from a clone so far. It reads SPEC scans and Timepix TIFF frames through
-QoraGeom, maps a rocking scan to q with the detector angles, finds streak and facet directions,
+First version, installed from a clone so far. Its I/O layer `cxd.io` reads SPEC scans and Timepix
+TIFF, .mat and HDF5 frames (extra `cxd[io]`); the analysis maps a rocking scan to q with the detector angles, finds streak and facet directions,
 draws line profiles and 3D q-space views, hands a detector-frame crop to QoraPhase, and sorts
 reconstructed amplitudes into true and twin groups.
 

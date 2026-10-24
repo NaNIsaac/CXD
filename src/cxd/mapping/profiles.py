@@ -1,5 +1,3 @@
-import warnings
-
 import numpy as np
 from scipy.ndimage import map_coordinates
 
@@ -73,19 +71,3 @@ def get_symmetric_profiles(imgs, com, peak_vectors, length=50, thickness=2):
             )
 
     return combined_results
-
-
-_MOVED = {"plot_paired_lines_subplots", "plot_origin_style"}
-
-
-def __getattr__(name):
-    if name in _MOVED:
-        warnings.warn(
-            f"cxd.mapping.profiles.{name} moved to cxd.mapping.profiles_view",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        from cxd.mapping import profiles_view
-
-        return getattr(profiles_view, name)
-    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
