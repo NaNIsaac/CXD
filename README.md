@@ -142,6 +142,7 @@ All test data is **synthetic**; no measured data ships with the repository.
 - `src/cxd/core/visualize.py` - PyVista 3D q-space viewer
 - `src/cxd/mapping/spherical.py` - (cos θ, φ) histogram around the CoM, DBSCAN streak directions
 - `src/cxd/mapping/profiles.py` - thick line profiles along paired opposite directions
+- `src/cxd/mapping/profiles_view.py` - matplotlib plots of those profiles
 - `src/cxd/mapping/vtk_view.py` - VTK render of the pattern in reciprocal-space coordinates
 - `src/cxd/mapping/qspace.py` - isotropic q resampling, central-peak mask, r²-weighted θ/φ orientation map, local-max peaks
 - `src/cxd/mapping/orientation_view.py` - Lambert projection and PyVista 3D view of the orientations
