@@ -3,14 +3,24 @@ name = "cxd"
 version = "0.1.0"
 description = "Analysis code for coherent X-ray diffraction (CXD) data: SPEC parsing, Timepix frame loading, q-space regridding and 3D visualization"
 readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE*"]
 authors = [{ name = "Isaac Yong", email = "isaacyong@naver.com" }]
 requires-python = ">=3.13"
+keywords = ["coherent X-ray diffraction", "BCDI", "SPEC", "Timepix", "reciprocal space"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering :: Physics",
+]
 dependencies = [
     "matplotlib>=3.10.8",
     "numpy>=2.4.4",
     "pandas>=3.0.2",
     "pyvista[colormaps]>=0.47.3",
-    "qorageom @ git+https://github.com/NaNIsaac/QoraGeom",
+    "qorageom>=0.1.0",
     "roi-rectangle>=1.0.0",
     "scikit-learn>=1.8.0",
     "scipy>=1.17.1",
@@ -20,6 +30,8 @@ dependencies = [
 [project.urls]
 Homepage = "https://github.com/NaNIsaac/CXD"
 Repository = "https://github.com/NaNIsaac/CXD"
+Issues = "https://github.com/NaNIsaac/CXD/issues"
+Changelog = "https://github.com/NaNIsaac/CXD/blob/main/CHANGELOG.md"
 
 [build-system]
 requires = ["uv_build>=0.9.17,<0.10.0"]
@@ -33,6 +45,10 @@ dev = [
     "qoraphase>=0.2",
     "ruff>=0.15.10",
 ]
+
+# qorageom is not on PyPI yet; drop this entry once it is released
+[tool.uv.sources]
+qorageom = { git = "https://github.com/NaNIsaac/QoraGeom" }
 
 [tool.ruff]
 line-length = 100
