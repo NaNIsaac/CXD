@@ -15,25 +15,26 @@ def visualize_q_space_vtk(
     origin: tuple[float, float, float] = (0.0, 0.0, 0.0),
     show: bool = True,
 ) -> Any:
-    """3D Q-space intensity를 PyVista로 시각화.
+    """Plot a 3D Q-space intensity volume with PyVista.
 
     Args:
-        q_data: (n_omega, ny, nx) 형태의 intensity 배열. 축 순서는 (Qz, Qy, Qx)로 해석.
-        threshold_ratio: 최대 강도 대비 시각화 하한 비율.
-        show_axes: 방향 축 위젯 표시 여부.
-        mode: "contour"(isosurface), "volume"(volume rendering), "threshold"(하한 이상 복셀 메시).
-        log: True면 np.log1p(q_data)로 변환한 뒤 시각화 (동적 범위 압축).
-        spacing: 각 축의 Q-unit 간격 (Qx, Qy, Qz).
-        origin: Q-공간 원점 (Qx, Qy, Qz).
-        show: False면 plotter를 띄우지 않고 반환만 함 (테스트/추가 커스터마이즈용).
+        q_data: intensity array of shape (n_omega, ny, nx); axes are read as (Qz, Qy, Qx).
+        threshold_ratio: lower display limit as a fraction of the maximum intensity.
+        show_axes: whether to show the orientation axes widget.
+        mode: "contour" (isosurface), "volume" (volume rendering), or "threshold"
+            (voxels above the limit).
+        log: plot np.log1p(q_data) to compress the dynamic range.
+        spacing: Q-unit step per axis (Qx, Qy, Qz).
+        origin: origin in Q-space (Qx, Qy, Qz).
+        show: if False, return the plotter without showing it.
 
     Returns:
-        show=True면 plotter.show()의 결과(Jupyter에서는 trame 위젯). show=False면 pv.Plotter.
+        The result of plotter.show() (a trame widget in Jupyter) if show, else the pv.Plotter.
     """
     data = np.log1p(q_data) if log else q_data
 
-    # VTK ImageData는 point(i,j,k) → flat index i + j*nx + k*nx*ny (x가 가장 빨리 변함).
-    # q_data shape가 (nz, ny, nx)일 때 C-order flatten이 정확히 이 규약을 만족.
+    # VTK ImageData flat index is i + j*nx + k*nx*ny (x fastest), which a C-order flatten of
+    # (nz, ny, nx) data matches.
     nz, ny, nx = data.shape
     grid = pv.ImageData()
     grid.dimensions = (nx, ny, nz)

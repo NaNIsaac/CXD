@@ -8,10 +8,10 @@ def calculate_qspace_params(energy_kev, tth_deg, sdd_mm, pixel_mm, omega_step_de
     k_in = 2 * np.pi / lam  # A^-1
     q_cen = tth_to_q(tth_deg, lam)  # Bragg q
 
-    # 2. Detector dq (Y, X)
+    # detector dq (Y, X)
     dq_pixel = k_in * (pixel_mm / sdd_mm)  # A^-1 / pixel
 
-    # 3. Rocking dq (Z)
+    # rocking dq (Z)
     dq_rock = q_cen * np.radians(omega_step_deg)
 
     return dq_rock, dq_pixel, dq_pixel
@@ -33,14 +33,14 @@ def get_full_spherical_map(imgs, com, max_r, num_theta=180, num_phi=360):
 
     T, P, R = np.meshgrid(theta_axis, phi_axis, r_axis, indexing="ij")
 
-    # 구좌표계 -> Cartesian (COM 기준) - map_coordinates는 Z, Y, X 순서
+    # spherical to Cartesian around the COM, ordered (Z, Y, X) as map_coordinates expects
     z_coords = com[0] + R * np.cos(T)
     y_coords = com[1] + R * np.sin(T) * np.sin(P)
     x_coords = com[2] + R * np.sin(T) * np.cos(P)
 
     coords = np.vstack((z_coords.ravel(), y_coords.ravel(), x_coords.ravel()))
 
-    # 샘플링 및 통합 (Max Projection)
+    # max projection along r
     sampled_values = ndimage.map_coordinates(imgs, coords, order=1, mode="nearest")
     sampled_values = sampled_values.reshape(T.shape)
     spherical_map = np.max(sampled_values, axis=2)
@@ -58,26 +58,22 @@ def find_robust_peaks(spherical_map, theta_ax, phi_ax, threshold=0.6, min_dist=1
     for r, c in peaks:
         results.append((theta_ax[r], phi_ax[c], spherical_map[r, c]))
 
-    # 강도 순으로 정렬
     results.sort(key=lambda x: x[2], reverse=True)
     return results
 
 
 def get_radial_mask_radius(q_imgs, com, sigma_multiplier=3.0):
-    """
-    구표면 평균 강도 분포를 분석하여 중심 덩어리의 마스킹 반경을 결정합니다.
-    """
+    """Mask radius of the central blob from the mean intensity per shell, times sigma_multiplier."""
     z, y, x = np.ogrid[: q_imgs.shape[0], : q_imgs.shape[1], : q_imgs.shape[2]]
     r_dist = np.sqrt((z - com[0]) ** 2 + (y - com[1]) ** 2 + (x - com[2]) ** 2)
 
-    # 1. 구표면 평균 강도 계산
+    # mean intensity per spherical shell
     r_int = r_dist.astype(np.int32)
     radial_sum = ndimage.sum(q_imgs, labels=r_int, index=np.arange(r_int.max() + 1))
     radial_count = ndimage.sum(np.ones_like(q_imgs), labels=r_int, index=np.arange(r_int.max() + 1))
     radial_mean = radial_sum / (radial_count + 1e-9)
 
-    # 2. 중심 덩어리의 '어깨' 지점 찾기 (가우시안 sigma 대용)
-    # peak 강도의 10% 지점 혹은 기울기가 급격히 변하는 지점 선택
+    # outer edge of the central blob: the last shell above 10% of the peak shell mean
     threshold = np.max(radial_mean) * 0.1
     mask_indices = np.where(radial_mean > threshold)[0]
 
@@ -89,23 +85,17 @@ def extract_orientation_map(q_imgs, com, r_mask, num_theta=180, num_phi=360):
     z, y, x = np.ogrid[: q_imgs.shape[0], : q_imgs.shape[1], : q_imgs.shape[2]]
     r_dist = np.sqrt((z - com[0]) ** 2 + (y - com[1]) ** 2 + (x - com[2]) ** 2)
 
-    # 마스킹 적용
     mask = r_dist > r_mask
     valid_z, valid_y, valid_x = np.where(mask & (q_imgs > 0))
     intensities = q_imgs[valid_z, valid_y, valid_x]
 
-    # 구면 좌표 변환
     dz, dy, dx = valid_z - com[0], valid_y - com[1], valid_x - com[2]
     r_valid = np.sqrt(dz**2 + dy**2 + dx**2)
 
     theta = np.arccos(dz / r_valid)
     phi = np.arctan2(dy, dx)
 
-    # ==========================================
-    # [핵심 수정 포인트] r^2 보정 및 로그 스케일링
-    # 1. 거리가 멀수록 가중치를 줌 (스트릭 강화)
-    # 2. 극단적인 강도 차이를 줄이기 위해 log 적용
-    # ==========================================
+    # weight by r^2 to strengthen streaks far from the center, then log10 to compress the range
     compensated_intensities = intensities * (r_valid**2)
     log_intensities = np.log10(compensated_intensities + 1)
 
@@ -114,7 +104,7 @@ def extract_orientation_map(q_imgs, com, r_mask, num_theta=180, num_phi=360):
         phi,
         bins=[num_theta, num_phi],
         range=[[0, np.pi], [-np.pi, np.pi]],
-        weights=log_intensities,  # 수정된 가중치 적용
+        weights=log_intensities,
     )
 
     t_ax = (t_edges[:-1] + t_edges[1:]) / 2
