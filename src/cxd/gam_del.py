@@ -8,7 +8,6 @@ from matplotlib.widgets import Slider, TextBox
 from cxd.core.spec import Spec
 
 
-# === 1. 기하학 이론 곡선 계산 함수 ===
 def calculate_theory_delta(gamma_array, tth):
     gam_rad = np.radians(gamma_array)
     tth_rad = np.radians(tth)
@@ -17,12 +16,8 @@ def calculate_theory_delta(gamma_array, tth):
     return np.degrees(np.arccos(cos_val))
 
 
-# === 2. SPEC 데이터 로더 함수 (Run 순서 유지) ===
 def load_run_data(sp: Spec, run_ns: list[int]) -> pd.DataFrame:
-    """
-    주어진 run 번호 리스트에서 Gamma와 Delta 값을 추출하여 DataFrame으로 반환합니다.
-    입력된 run_ns 리스트 순서가 그대로 유지됩니다.
-    """
+    """Gamma and Delta of the given runs as a DataFrame, in the order of run_ns."""
     data = []
     for run_n in run_ns:
         scan = sp.get_scan(run_n)
@@ -33,9 +28,6 @@ def load_run_data(sp: Spec, run_ns: list[int]) -> pd.DataFrame:
     return pd.DataFrame(data).dropna()
 
 
-# ==========================================
-# [Main 실행부]
-# ==========================================
 def main():
     parser = argparse.ArgumentParser(
         description="Measured gamma/delta of runs against the theoretical arc of one 2theta."
@@ -45,17 +37,15 @@ def main():
     args = parser.parse_args()
     spec_file, run_ns = args.spec_file, args.runs
 
-    # --- 1. SPEC 데이터 로드 ---
     sp = Spec(spec_file)
     df = load_run_data(sp, run_ns)
     gamma_data = df["gamma"].values
     delta_data = df["delta"].values
 
-    # --- 2. Matplotlib UI 및 그래프 초기화 ---
     fig, ax = plt.subplots(figsize=(11, 8))
     plt.subplots_adjust(bottom=0.25)
 
-    # ⭐ 정렬 없이 run_ns 리스트 인덱스 순서대로 라인 연결
+    # no sorting: the line joins the points in run_ns order
     (data_line,) = ax.plot(
         gamma_data,
         delta_data,
@@ -85,7 +75,6 @@ def main():
         ax.spines[side].set_linewidth(border_width)
     ax.tick_params(direction="in", length=5, width=border_width, labelsize=10, top=True, right=True)
 
-    # --- 3. 인터랙티브 위젯 배정 ---
     ax_tth = plt.axes([0.15, 0.11, 0.45, 0.03])
     ax_txt = plt.axes([0.72, 0.11, 0.15, 0.03])
 
@@ -104,10 +93,9 @@ def main():
     )
     t_tth = TextBox(ax_txt, r"Direct $2\theta$ ", initial=str(init_tth))
 
-    # 이론 가이드라인은 부드러운 곡선 출력을 위해 Gamma 최솟값~최댓값 스페이스 유지
+    # the theory curve spans the gamma range of the data, sampled finely to look smooth
     g_range = np.linspace(gamma_data.min() - 4, gamma_data.max() + 4, 500)
 
-    # --- 4. 실시간 가이드라인 업데이트 루틴 ---
     def update(val=None):
         current_tth = s_tth.val
         y_theory = calculate_theory_delta(g_range, current_tth)
@@ -135,17 +123,14 @@ def main():
             new_val = max(s_tth.valmin, s_tth.val - STEP_SIZE)
             s_tth.set_val(new_val)
 
-    # 위젯 및 키보드 이벤트 바인딩
     s_tth.on_changed(update)
     t_tth.on_submit(submit)
     fig.canvas.mpl_connect("key_press_event", on_key_press)
 
-    # 뷰포트 마진 세팅 및 범례 표시
     ax.set_xlim(gamma_data.min() - 2, gamma_data.max() + 2)
     ax.set_ylim(delta_data.min() - 1, delta_data.max() + 1)
     ax.legend(loc="upper right", frameon=True)
 
-    # 첫 렌더링 구동
     update()
     plt.show()
 

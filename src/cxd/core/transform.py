@@ -36,14 +36,12 @@ def correct_rocking(
     if num_omega != len(thetas):
         raise ValueError(f"Depth of frames {num_omega} mismatch with theta length {len(thetas)}.")
 
-    # 1. Float Origin 처리 (Interpolation for center theta)
     cen_omega_idx, cen_y, cen_x = beam_center[0], beam_center[1], beam_center[2]
 
-    # 실수 인덱스에 대응하는 theta 값을 선형 보간으로 추출
-    # origin[0]이 1.5라면 thetas[1]과 [2]의 중간값 계산
+    # the beam center index is fractional, so interpolate theta linearly
+    # (1.5 -> mean of thetas[1] and thetas[2])
     center_theta = np.interp(cen_omega_idx, np.arange(len(thetas)), thetas)
 
-    # 2. 2D Detector q_lab vector (Vectorized)
     y_idx, x_idx = np.indices((ny, nx))
     dy = (y_idx - cen_y) * pixel_size
     dx = (x_idx - cen_x) * pixel_size
@@ -57,8 +55,7 @@ def correct_rocking(
     q_lab = kf_lab - ki_lab
     q_lab_flat = q_lab.reshape(3, -1)  # (3, ny*nx)
 
-    # 3. Rocking Angle Transformation (q_lab -> q_crystal)
-    # Relative rotation based on the center_theta
+    # rotate q_lab into the crystal frame by the angle relative to center_theta
     omegas = np.deg2rad(thetas - center_theta)
 
     cos_w = np.cos(-omegas)
@@ -80,8 +77,7 @@ def correct_rocking(
     q_crystal_points = np.transpose(q_crystal, (0, 2, 1)).reshape(-1, 3)
     intensities = frames.ravel()
 
-    # 4. Regridding
-    # bins 설정 시 데이터의 범위를 자동으로 잡거나 hyperparameter로 관리 필요
+    # bins should come from the data range or be a parameter
     bins = [num_omega, ny, nx]
 
     regridded_q_space, edges = np.histogramdd(q_crystal_points, bins=bins, weights=intensities)

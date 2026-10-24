@@ -50,7 +50,6 @@ def main():
         u_vecs, hist, u_edges, phi_edges = map2spherical(imgs, com, bins=150)
         hist = np.where(hist > args.hist_thres, hist, 0)
         hist = gaussian_filter(hist, sigma=1)
-        # eps=0.1은 약 5.7도 이내의 점들을 하나로 묶음
         peaks = extract_peak_from_2d_map(hist, u_edges, phi_edges, eps=0.2, threshold_rel=0.3)
         print(f"검출된 피크 개수: {len(peaks)}")
 
