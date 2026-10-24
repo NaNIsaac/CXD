@@ -10,11 +10,11 @@ from pathlib import Path
 
 import numpy as np
 import pytest
-from qorageom.io import load_tif_stack
 from scipy.io import loadmat
 
 from cxd.core.handoff import to_qoraphase
-from cxd.core.spec import Spec
+from cxd.io.frames import load_tif_stack
+from cxd.io.spec import Spec
 from cxd.mapping.qspace import calculate_qspace_params
 
 ENERGY_KEV = 9.0  # not in the synthetic SPEC file; chosen for the test

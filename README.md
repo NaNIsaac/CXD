@@ -12,7 +12,7 @@ In a Bragg coherent X-ray diffraction (BCDI) measurement a small crystal is rock
 
 ## Responsibility boundary
 
-**Current implementation:** CXD provides coherent-diffraction scan analysis and visualization, plus experiment-specific SPEC/Timepix workflows. It currently uses [QoraGeom](https://github.com/NaNIsaac/QoraGeom) for geometry and some SPEC/frame reading; `cxd.core.spec` exposes legacy import paths. The usage examples below reflect that current API.
+**Current implementation:** the analysis packages `cxd.core` and `cxd.mapping` (and `cxd.twin_finder`) work on arrays and take their geometry from [QoraGeom](https://github.com/NaNIsaac/QoraGeom). File formats live in the I/O layer `cxd.io`: `cxd.io.spec` (SPEC parser, `geometry_from_spec`, `get_positions`) and `cxd.io.frames` (.mat, TIFF and HDF5 frames). The analysis packages never import `cxd.io` (`tests/test_import_boundary.py`). Its file dependencies come with `cxd[io]`. The usage examples below reflect this API.
 
 **Direction:** keep numerical analysis/regridding interfaces usable on arrays and structured metadata independently of SPEC and detector file formats. Put instrument-specific loaders and conversion steps at the application/adapter boundary. Coordinate with QoraGeom's planned I/O separation; preserve existing imports until migration is tested.
 
@@ -45,7 +45,7 @@ uv run python -c "import cxd, qorageom"
 
 ## Usage
 
-The SPEC parser, frame loaders and geometry live in [QoraGeom](https://github.com/NaNIsaac/QoraGeom) (`qorageom`), installed from git as a dependency. `cxd.core.spec` re-exports `Spec`, `SpecScan` and adds `get_positions`.
+The geometry lives in [QoraGeom](https://github.com/NaNIsaac/QoraGeom) (`qorageom`), installed from git as a dependency. Reading files is the job of `cxd.io`: `cxd.io.spec` parses SPEC files (`Spec`, `SpecScan`), turns a scan header into a QoraGeom `ScanGeometry` (`geometry_from_spec`) and collects motor positions per run (`get_positions`); `cxd.io.frames` loads detector frames. `pip install cxd[io]` adds pandas, tifffile and h5py for them (a checkout's `uv sync` has them already).
 
 No measured data ships with the repo. `examples/synthetic_scan.py` writes a synthetic rocking scan to `examples/data/`: a SPEC file (`synthetic.spec`, scan 1), its TIFF frames (`S0001/`) and the ROI stack as `.mat` (`scan_0001.mat`). The notebooks and the examples below use it.
 
@@ -55,7 +55,7 @@ uv run python examples/synthetic_scan.py
 ```
 
 ```python
-from cxd.core.spec import Spec, get_positions
+from cxd.io.spec import Spec, get_positions
 
 with Spec("examples/data/synthetic.spec") as sp:
     scan = sp.get_scan(1)
@@ -143,7 +143,6 @@ All test data is **synthetic**; no measured data ships with the repository.
 
 ## Structure
 
-- `src/cxd/core/spec.py` - `get_positions`; `Spec`, `SpecScan` from `qorageom.spec`
 - `src/cxd/core/rocking.py` - rocking scan to q with the detector angles (QoraGeom), binned with edges
 - `src/cxd/core/transform.py` - `correct_rocking`, kept for reproducing earlier results
 - `src/cxd/core/handoff.py` - `to_qoraphase`: detector-frame crop and mask for QoraPhase
@@ -155,6 +154,8 @@ All test data is **synthetic**; no measured data ships with the repository.
 - `src/cxd/mapping/qspace.py` - isotropic q resampling, central-peak mask, r²-weighted θ/φ orientation map, local-max peaks
 - `src/cxd/mapping/orientation_view.py` - Lambert projection and PyVista 3D view of the orientations
 - `src/cxd/twin_finder.py` - split reconstructed amplitudes into true/twin groups (FFT cross-correlation + KMeans)
+- `src/cxd/io/spec.py` - SPEC parser, `geometry_from_spec` (scan header to a QoraGeom `ScanGeometry`), `get_positions`
+- `src/cxd/io/frames.py` - `load_mat`, `load_tif_stack`, `load_h5`
 - `scripts/` - `prep_frames`, `analyze_raw`, `rocking_curve`, `fwhm_vs_q`, `streak_profiles`, `orientation_map`, `gam_del` (interactive gamma/delta vs. theoretical 2theta check)
 
 ## Tests

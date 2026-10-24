@@ -1,8 +1,8 @@
 """What the numerical core loads, and whether each runtime dependency is used by the package.
 
-CXD's core computes on arrays: it should run without a 3-D viewer, a plotting library, a SPEC
-parser or QoraPhase. Known gaps are ``xfail(strict=True)``, so a fix turns the test red and the
-mark has to go in the same change.
+CXD's core computes on arrays: it should run without a 3-D viewer, a plotting library, the I/O
+layer ``cxd.io``, a SPEC parser or QoraPhase. Known gaps are ``xfail(strict=True)``, so a fix
+turns the test red and the mark has to go in the same change.
 """
 
 import ast
@@ -52,6 +52,11 @@ def strict_xfail(reason):
 )
 def test_numerical_module_loads_no_presentation_library(module):
     assert not loaded_after(module) & PRESENTATION
+
+
+@pytest.mark.parametrize("module", NUMERICAL)
+def test_numerical_module_loads_no_cxd_io(module):
+    assert not loaded_after(module) & {"cxd.io", "cxd.io.spec", "cxd.io.frames"}
 
 
 @pytest.mark.parametrize(

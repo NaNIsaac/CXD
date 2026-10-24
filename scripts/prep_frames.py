@@ -2,7 +2,8 @@ import argparse
 from pathlib import Path
 
 import numpy as np
-from qorageom.io import load_tif_stack
+
+from cxd.io.frames import load_tif_stack
 
 
 def merge_raw_tif_to_npy(tif_dir: Path | str, save_file: Path | str) -> None:

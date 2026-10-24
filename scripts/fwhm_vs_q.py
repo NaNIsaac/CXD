@@ -7,7 +7,7 @@ import pandas as pd
 from qorageom import tth_to_q, wavelength
 from scipy.optimize import curve_fit
 
-from cxd.core.spec import Spec
+from cxd.io.spec import Spec
 
 
 def calculate_q_geometry(delta, gamma, energy_kev, g_off=0.0, d_off=0.0):

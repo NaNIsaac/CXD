@@ -5,7 +5,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.widgets import Slider, TextBox
 
-from cxd.core.spec import Spec
+from cxd.io.spec import Spec
 
 
 def calculate_theory_delta(gamma_array, tth):

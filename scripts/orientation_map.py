@@ -1,7 +1,7 @@
 import argparse
 from pathlib import Path
 
-from qorageom.io import load_mat
+from cxd.io.frames import load_mat
 from scipy import ndimage
 
 from cxd.mapping.orientation_view import (
