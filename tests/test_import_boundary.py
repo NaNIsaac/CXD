@@ -48,12 +48,7 @@ def strict_xfail(reason):
 
 @pytest.mark.parametrize(
     "module",
-    [
-        pytest.param(m, marks=strict_xfail("plot functions share the module, matplotlib at top"))
-        if m == "cxd.mapping.profiles"
-        else m
-        for m in NUMERICAL
-    ],
+    NUMERICAL,
 )
 def test_numerical_module_loads_no_presentation_library(module):
     assert not loaded_after(module) & PRESENTATION

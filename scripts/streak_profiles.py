@@ -6,7 +6,8 @@ from qorageom import shear_correction, wavelength
 from qorageom.io import load_mat
 from scipy.ndimage import center_of_mass, gaussian_filter
 
-from cxd.mapping.profiles import get_symmetric_profiles, plot_origin_style
+from cxd.mapping.profiles import get_symmetric_profiles
+from cxd.mapping.profiles_view import plot_origin_style
 from cxd.mapping.spherical import extract_peak_from_2d_map, map2spherical
 from cxd.mapping.vtk_view import vtk_visualize_cxd
 
