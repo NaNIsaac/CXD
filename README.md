@@ -122,7 +122,7 @@ uv run python -m scripts.streak_profiles examples/data/scan_0001.mat --save-dir 
 uv run python -m scripts.orientation_map <roi.mat> --energy <keV> --tth <deg> --sdd <mm>
 uv run python -m scripts.analyze_raw <specfile> <data_dir> <npy_folder> <run> [<run> ...]
 uv run python -m scripts.fwhm_vs_q <specfile> <list1.csv> [<list2.csv> ...] --energy <keV>
-uv run python -m cxd.gam_del <specfile> <run> [<run> ...]
+uv run python -m scripts.gam_del <specfile> <run> [<run> ...]
 ```
 
 ## Validation
@@ -154,8 +154,7 @@ All test data is **synthetic**; no measured data ships with the repository.
 - `src/cxd/mapping/qspace.py` - isotropic q resampling, central-peak mask, r²-weighted θ/φ orientation map, local-max peaks
 - `src/cxd/mapping/orientation_view.py` - Lambert projection and PyVista 3D view of the orientations
 - `src/cxd/twin_finder.py` - split reconstructed amplitudes into true/twin groups (FFT cross-correlation + KMeans)
-- `src/cxd/gam_del.py` - interactive gamma/delta vs. theoretical 2theta check
-- `scripts/` - `prep_frames`, `analyze_raw`, `rocking_curve`, `fwhm_vs_q`, `streak_profiles`, `orientation_map`
+- `scripts/` - `prep_frames`, `analyze_raw`, `rocking_curve`, `fwhm_vs_q`, `streak_profiles`, `orientation_map`, `gam_del` (interactive gamma/delta vs. theoretical 2theta check)
 
 ## Tests
 
