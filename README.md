@@ -10,14 +10,6 @@ The synthetic scan from `examples/synthetic_scan.py`: a detector frame, the rock
 
 In a Bragg coherent X-ray diffraction (BCDI) measurement a small crystal is rocked through a Bragg reflection while an area detector records a coherent diffraction pattern at each angle; the stack of frames samples the 3D diffraction pattern around one reciprocal-lattice point. This package is for reducing such scans recorded with SPEC and a Timepix detector: it reads the scan metadata and frames, maps detector pixels and rocking angles to q, shows the result in 3D, finds facet/streak directions, and sorts reconstructed amplitudes into true and twin-image groups.
 
-## Responsibility boundary
-
-**Current implementation:** CXD provides coherent-diffraction scan analysis and visualization, plus experiment-specific SPEC/Timepix workflows. It currently uses [QoraGeom](https://github.com/NaNIsaac/QoraGeom) for geometry and some SPEC/frame reading; `cxd.core.spec` exposes legacy import paths. The usage examples below reflect that current API.
-
-**Direction:** keep numerical analysis/regridding interfaces usable on arrays and structured metadata independently of SPEC and detector file formats. Put instrument-specific loaders and conversion steps at the application/adapter boundary. Coordinate with QoraGeom's planned I/O separation; preserve existing imports until migration is tested.
-
-**Separate application:** [QoraFlow](https://github.com/NaNIsaac/QoraFlow) is an integrated experimental data-reduction pipeline and is not required to follow the same pure-library boundary.
-
 ## Install
 
 Requires [uv](https://docs.astral.sh/uv/) and Python 3.13 (uv fetches it if missing). Not on PyPI yet: the first release will add `pip install cxd`, after QoraGeom is released.
@@ -43,7 +35,7 @@ uv sync
 uv run python -c "import cxd, qorageom"
 ```
 
-## Usage
+## Quick start
 
 The SPEC parser, frame loaders and geometry live in [QoraGeom](https://github.com/NaNIsaac/QoraGeom) (`qorageom`), installed from git as a dependency. `cxd.core.spec` re-exports `Spec`, `SpecScan` and adds `get_positions`.
 
@@ -124,6 +116,21 @@ uv run python -m scripts.analyze_raw <specfile> <data_dir> <npy_folder> <run> [<
 
 Plots that need only a SPEC file (rocking curves, FWHM vs Q, gamma/delta check, mesh maps) are in
 [splotter](https://github.com/NaNIsaac/splotter).
+
+## Documentation
+
+- [docs/index.md](docs/index.md): the overview the documentation site builds from, with a first run of its own.
+- [docs/perf.md](docs/perf.md): time and memory of the regridding step on synthetic volumes.
+- [QoraGeom](https://github.com/NaNIsaac/QoraGeom): the SPEC parser, frame loaders and diffractometer geometry CXD builds on.
+- [QoraPhase](https://github.com/NaNIsaac/QoraPhase): phase retrieval, for the handoff described in [Quick start](#quick-start).
+
+## Responsibility boundary
+
+**Current implementation:** CXD provides coherent-diffraction scan analysis and visualization, plus experiment-specific SPEC/Timepix workflows. It currently uses [QoraGeom](https://github.com/NaNIsaac/QoraGeom) for geometry and some SPEC/frame reading; `cxd.core.spec` exposes legacy import paths. The examples below reflect that current API.
+
+**Direction:** keep numerical analysis/regridding interfaces usable on arrays and structured metadata independently of SPEC and detector file formats. Put instrument-specific loaders and conversion steps at the application/adapter boundary. Coordinate with QoraGeom's planned I/O separation; preserve existing imports until migration is tested.
+
+**Separate application:** [QoraFlow](https://github.com/NaNIsaac/QoraFlow) is an integrated experimental data-reduction pipeline and is not required to follow the same pure-library boundary.
 
 ## Validation
 
