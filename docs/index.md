@@ -54,7 +54,7 @@ Output, from CXD 0.1.0 on Python 3.13 (Windows):
 
 The README is the full guide. Its sections:
 
-- [Usage](../README.md#usage): regridding a rocking scan with `map_rocking_scan`, the 3D viewer, the QoraPhase handoff and its axis and mask conventions, and the command-line scripts.
+- [Quick start](../README.md#quick-start): regridding a rocking scan with `map_rocking_scan`, the 3D viewer, the QoraPhase handoff and its axis and mask conventions, and the command-line scripts.
 - [Validation](../README.md#validation): what the synthetic tests check and the known limits.
 - [Structure](../README.md#structure): the modules.
 
