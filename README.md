@@ -126,7 +126,7 @@ Plots that need only a SPEC file (rocking curves, FWHM vs Q, gamma/delta check, 
 
 ## Responsibility boundary
 
-**Current implementation:** CXD provides coherent-diffraction scan analysis and visualization, plus experiment-specific SPEC/Timepix workflows. It currently uses [QoraGeom](https://github.com/NaNIsaac/QoraGeom) for geometry and some SPEC/frame reading; `cxd.core.spec` exposes legacy import paths. The examples below reflect that current API.
+**Current implementation:** CXD provides coherent-diffraction scan analysis and visualization, plus experiment-specific SPEC/Timepix workflows. It currently uses [QoraGeom](https://github.com/NaNIsaac/QoraGeom) for geometry and some SPEC/frame reading; `cxd.core.spec` exposes legacy import paths. The examples above use that current API.
 
 **Direction:** keep numerical analysis/regridding interfaces usable on arrays and structured metadata independently of SPEC and detector file formats. Put instrument-specific loaders and conversion steps at the application/adapter boundary. Coordinate with QoraGeom's planned I/O separation; preserve existing imports until migration is tested.
 
