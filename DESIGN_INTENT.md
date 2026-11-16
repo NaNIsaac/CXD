@@ -19,9 +19,18 @@ facet directions, and sorts reconstructed amplitudes into true and twin-image gr
 - `scripts/` and `examples/`: command-line workflows and the synthetic scan. They are not part of
   the package.
 
+## Planned boundary
+
+SPEC parsing and frame loading belong to CXD; QoraGeom keeps the diffractometer geometry only.
+The target layout is `cxd.io` (the SPEC parser, `geometry_from_spec`, the frame loaders and
+`positions`, with the extra `cxd[io]`) and `cxd.viz` (the pyvista, vtk and matplotlib views, with
+the extra `cxd[viz]`). The core imports neither. No compatibility re-exports are planned for the
+old paths. Until the move, the readers still come from `qorageom.spec` and `qorageom.io` (see
+Known gaps).
+
 ## Non-goals
 
-- SPEC parsing, frame loading and diffractometer geometry: these are QoraGeom's.
+- Diffractometer geometry and q of a detector pixel: these are QoraGeom's.
 - Phase retrieval: QoraPhase does it; CXD only prepares its input (`to_qoraphase`).
 - Plots that need only a SPEC file: splotter (`cxd.gam_del` is a shim that points there).
 - A beamline data-reduction pipeline: QoraFlow.
@@ -29,8 +38,8 @@ facet directions, and sorts reconstructed amplitudes into true and twin-image gr
 
 ## Dependencies
 
-Allowed at runtime: numpy, scipy, pandas, scikit-learn and qorageom. matplotlib and pyvista are
-allowed only in the viewer modules.
+Allowed at runtime: numpy, scipy, scikit-learn and qorageom. pandas is used only by `core.spec`
+and belongs with the readers. matplotlib and pyvista are allowed only in the viewer modules.
 
 Never imported by the package:
 
@@ -39,7 +48,7 @@ Never imported by the package:
 - A viewer library (matplotlib, pyvista, vtk) in a numerical module, so the analysis runs headless
   and on a cluster.
 - A file reader inside numerical code: numerical functions take arrays and plain metadata, and
-  reading files stays at the edge (`core.spec`, `scripts/`).
+  reading files stays in the reader layer and `scripts/`.
 
 `tifffile` and `roi-rectangle` are used by `scripts/` and `examples/` only and sit in the
 `scripts` dependency group.
@@ -51,8 +60,9 @@ until the mark goes.
 
 ## Boundaries to sibling libraries
 
-- QoraGeom: q of a detector pixel, diffractometer conventions, wavelength, the SPEC parser and
-  frame loaders. CXD calls them and does not copy them. A new geometry or file format goes there.
+- QoraGeom: q of a detector pixel, diffractometer conventions, wavelength and the scan geometry.
+  CXD calls them and does not copy them. A new geometry goes there; a new file format goes into
+  CXD's reader layer.
 - cxd_map: its modules were moved into `cxd.mapping`, which is the home for that code. New
   mapping work goes into `cxd.mapping`.
 - cdiutils: not used by CXD.
@@ -63,9 +73,10 @@ until the mark goes.
 
 - Arrays are `(frame, y, x)`: rocking first, then detector rows and columns.
 - Angles in degrees, sample-detector distance and pixel size in mm, q in 1/Å with 2π included.
-- When a result or an import path changes, the old one stays with a `DeprecationWarning`
-  (`correct_rocking`, `cxd.gam_del`, the plot names once in `mapping.profiles`), so earlier
-  analyses can be reproduced.
+- When a result changes, the old function stays with a `DeprecationWarning` (`correct_rocking`),
+  so earlier analyses can be reproduced. The old import paths that still forward with a warning
+  (`cxd.core.spec`, `cxd.gam_del`, the plot names once in `mapping.profiles`) go when the planned
+  boundary is in place.
 - Each function that takes or returns a mask states its polarity in its docstring until the
   polarity is unified.
 - Test data is synthetic and seeded (`examples/synthetic_scan.py`).
@@ -80,6 +91,13 @@ until the mark goes.
   reachable with a `DeprecationWarning`.
 
 ## Known gaps
+
+- Readers not moved yet: the SPEC parser, `geometry_from_spec` and the frame loaders are still in
+  `qorageom.spec` and `qorageom.io`; `cxd.core.spec` re-exports the parser, and `scripts/`, the
+  notebooks and `tests/test_pipeline.py` import them from QoraGeom. There is no `cxd.io` or
+  `cxd[io]` yet.
+- Viewers not split yet: the views sit in `core.visualize` and `mapping/*_view.py`, and pyvista and
+  matplotlib are runtime dependencies. There is no `cxd.viz` or `cxd[viz]` yet.
 
 - Mask polarity: `core.handoff` uses `True` = unusable, `mapping.qspace` uses `True` = kept
   ([#25](https://github.com/NaNIsaac/CXD/issues/25)).
